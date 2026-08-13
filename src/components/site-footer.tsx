@@ -42,7 +42,7 @@ export function SiteFooter() {
           <ul className="mt-4 space-y-2 break-words text-sm opacity-90">
             <li>partnerships@kaleidonex.com</li>
             <li>+91 9798243828</li>
-            <li>Mon–Sat, 9:30am–6:30pm IST</li>
+            <li>Mon -Sat, 9:30 am - 5:30 pm IST</li>
           </ul>
         </div>
       </div>

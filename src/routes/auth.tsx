@@ -6,10 +6,10 @@ import { getSupabase, BACKEND_UNAVAILABLE } from "@/lib/supabase-optional";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Login — Kaleidonex CRM Portal" },
-      { name: "description", content: "Restricted sign in for Kaleidonex administrators." },
-      { property: "og:title", content: "Login — Kaleidonex CRM Portal" },
-      { property: "og:description", content: "Restricted sign in for Kaleidonex administrators." },
+      { title: "Login — KaleidoNex CRM Portal" },
+      { name: "description", content: "Restricted sign in for KaleidoNex administrators." },
+      { property: "og:title", content: "Login — KaleidoNex CRM Portal" },
+      { property: "og:description", content: "Restricted sign in for KaleidoNex administrators." },
     ],
   }),
   component: AuthPage,
@@ -60,7 +60,7 @@ function AuthPage() {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) throw signInError;
       await ensureAdminOrDeny();
-      if (!remember) sessionStorage.setItem("kaleidonex.session-only", "1");
+      if (!remember) sessionStorage.setItem("KaleidoNex.session-only", "1");
       navigate({ to: "/admin", replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");

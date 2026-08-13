@@ -8,9 +8,9 @@ export const Route = createFileRoute("/products")({
       {
         name: "description",
         content:
-          "Browse Kaleidonex robotics kits, development boards, curriculum books and STEM lab equipment supplied to partner schools.",
+          "Browse KaleidoNex robotics kits, development boards, curriculum books and STEM lab equipment supplied to partner schools.",
       },
-      { property: "og:title", content: "Kaleidonex Products & Robotics Kits" },
+      { property: "og:title", content: "KaleidoNex Products & Robotics Kits" },
       {
         property: "og:description",
         content: "Robotics kits, electronics, curriculum books and lab equipment for schools.",

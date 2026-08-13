@@ -14,12 +14,12 @@ export const Route = createFileRoute("/reset-password")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Reset password — Kaleidonex CRM Portal" },
-      { name: "description", content: "Set a new password for your Kaleidonex CRM portal account." },
-      { property: "og:title", content: "Reset password — Kaleidonex CRM Portal" },
+      { title: "Reset password — KaleidoNex CRM Portal" },
+      { name: "description", content: "Set a new password for your KaleidoNex CRM portal account." },
+      { property: "og:title", content: "Reset password — KaleidoNex CRM Portal" },
       {
         property: "og:description",
-        content: "Set a new password for your Kaleidonex CRM portal account.",
+        content: "Set a new password for your KaleidoNex CRM portal account.",
       },
     ],
   }),

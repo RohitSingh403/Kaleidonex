@@ -8,9 +8,9 @@ export const Route = createFileRoute("/solutions")({
       {
         name: "description",
         content:
-          "Explore Kaleidonex's school solutions: coding, robotics labs, AI labs, STEM infrastructure, VR learning and entrepreneurship programmes.",
+          "Explore KaleidoNex's school solutions: coding, robotics labs, AI labs, STEM infrastructure, VR learning and entrepreneurship programmes.",
       },
-      { property: "og:title", content: "Kaleidonex Solutions for Schools" },
+      { property: "og:title", content: "KaleidoNex Solutions for Schools" },
       {
         property: "og:description",
         content: "Coding, robotics, AI, STEM labs, VR and entrepreneurship delivered as one programme.",

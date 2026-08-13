@@ -4,13 +4,13 @@ import { Card, CtaBand, PageHero, Section, SectionHeading } from "@/components/u
 export const Route = createFileRoute("/schools")({
   head: () => ({
     meta: [
-      { title: "For Schools — Partnership Model & Rollout Plan | Kaleidonex" },
+      { title: "For Schools — Partnership Model & Rollout Plan | KaleidoNex" },
       {
         name: "description",
         content:
-          "See how Kaleidonex school partnerships work: onboarding, programme manager, lab setup, teacher training, audits and student progress reporting.",
+          "See how KaleidoNex school partnerships work: onboarding, programme manager, lab setup, teacher training, audits and student progress reporting.",
       },
-      { property: "og:title", content: "Kaleidonex School Partnerships" },
+      { property: "og:title", content: "KaleidoNex School Partnerships" },
       {
         property: "og:description",
         content: "Onboarding, labs, trained teachers, audits and reporting — managed end to end.",
@@ -35,7 +35,7 @@ function Schools() {
       <PageHero
         eyebrow="For schools"
         title="A partnership designed for the academic year"
-        description="Signing with Kaleidonex replaces vendor management with one accountable programme, one manager and one reporting line."
+        description="Signing with KaleidoNex replaces vendor management with one accountable programme, one manager and one reporting line."
       />
 
       <Section>

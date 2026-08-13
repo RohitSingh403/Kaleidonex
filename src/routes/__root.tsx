@@ -81,14 +81,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Kaleidonex — Future-Ready Education for Schools" },
+      { title: "KaleidoNex — Future-Ready Education for Schools" },
       {
         name: "description",
         content:
-          "Kaleidonex builds AI, robotics, coding and STEM programmes for schools: curriculum, labs, kits, teacher training and progress tracking.",
+          "KaleidoNex builds AI, robotics, coding and STEM programmes for schools: curriculum, labs, kits, teacher training and progress tracking.",
       },
-      { name: "author", content: "Kaleidonex" },
-      { property: "og:title", content: "Kaleidonex — Future-Ready Education for Schools" },
+      { name: "author", content: "KaleidoNex" },
+      { property: "og:title", content: "KaleidoNex — Future-Ready Education for Schools" },
       {
         property: "og:description",
         content:

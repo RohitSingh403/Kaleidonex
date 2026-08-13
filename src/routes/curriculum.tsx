@@ -8,9 +8,9 @@ export const Route = createFileRoute("/curriculum")({
       {
         name: "description",
         content:
-          "Kaleidonex's NEP-aligned curriculum spans primary, middle and senior school with coding, AI, robotics, critical thinking and life skills.",
+          "KaleidoNex's NEP-aligned curriculum spans primary, middle and senior school with coding, AI, robotics, critical thinking and life skills.",
       },
-      { property: "og:title", content: "Kaleidonex Curriculum for Grades 1–12" },
+      { property: "og:title", content: "KaleidoNex Curriculum for Grades 1–12" },
       {
         property: "og:description",
         content: "Graded learning paths across coding, AI, robotics, finance and life skills.",

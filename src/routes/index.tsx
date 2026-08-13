@@ -10,13 +10,13 @@ import { CountUp } from "@/components/count-up";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Kaleidonex — AI, Robotics & STEM Programmes for Schools" },
+      { title: "KaleidoNex — AI, Robotics & STEM Programmes for Schools" },
       {
         name: "description",
         content:
-          "Kaleidonex equips schools with coding, AI, robotics, STEM and VR programmes: curriculum, labs, kits, teacher training and student progress tracking.",
+          "KaleidoNex equips schools with coding, AI, robotics, STEM and VR programmes: curriculum, labs, kits, teacher training and student progress tracking.",
       },
-      { property: "og:title", content: "Kaleidonex — AI, Robotics & STEM Programmes for Schools" },
+      { property: "og:title", content: "KaleidoNex — AI, Robotics & STEM Programmes for Schools" },
       {
         property: "og:description",
         content:
@@ -103,7 +103,7 @@ const faqs = [
   },
   {
     q: "Do you provide the teachers?",
-    a: "Both models work. We can train your existing staff or place a trained Kaleidonex instructor on campus.",
+    a: "Both models work. We can train your existing staff or place a trained KaleidoNex instructor on campus.",
   },
   {
     q: "Is the curriculum aligned to NEP and CBSE?",
@@ -132,7 +132,7 @@ function Home() {
             </Reveal>
             <Reveal delay={180}>
               <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-                Kaleidonex gives schools an end-to-end ecosystem: graded curriculum, lab setup,
+                KaleidoNex gives schools an end-to-end ecosystem: graded curriculum, lab setup,
                 robotics kits, certified teacher training and a dashboard that tracks every
                 student&rsquo;s progress.
               </p>

@@ -65,7 +65,7 @@ import { OurCentresSection } from "@/components/admin/our-centres-section";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin Dashboard — Kaleidonex" },
+      { title: "Admin Dashboard — KaleidoNex" },
       { name: "description", content: "Manage leads, content, schools, teachers and users." },
     ],
   }),
@@ -175,11 +175,10 @@ function AdminDashboard() {
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                  tab === t.id
+                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${tab === t.id
                     ? "bg-secondary font-semibold text-primary"
                     : "text-foreground/70 hover:bg-secondary/60 hover:text-foreground"
-                }`}
+                  }`}
               >
                 <t.icon className={`h-4 w-4 ${tab === t.id ? "text-accent" : "text-accent/70"}`} />
                 {t.label}
@@ -236,7 +235,7 @@ function AdminDashboard() {
         <div className="border-b border-border bg-card px-3 pb-3 sm:px-4 md:px-6">
           <h1 className="truncate text-base font-bold sm:text-lg">{active.label}</h1>
           <p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">
-            Kaleidonex / Admin / {active.label}
+            KaleidoNex / Admin / {active.label}
           </p>
         </div>
 
@@ -257,7 +256,7 @@ function AdminDashboard() {
         </main>
 
         <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-4 py-4 text-xs text-muted-foreground sm:px-6">
-          <span>Copyright © {new Date().getFullYear()} Kaleidonex</span>
+          <span>Copyright © {new Date().getFullYear()} KaleidoNex</span>
           <span className="flex gap-4">
             <Link to="/curriculum">Curriculum</Link>
             <Link to="/contact">Support</Link>
@@ -339,7 +338,7 @@ function OverviewSection({ onNavigate }: { onNavigate: (t: Tab) => void }) {
       </div>
 
       <Panel title="Platform report">
-        <p className="text-xs text-muted-foreground">Live totals across your Kaleidonex workspace.</p>
+        <p className="text-xs text-muted-foreground">Live totals across your KaleidoNex workspace.</p>
         <div className="mt-6 flex h-56 items-end gap-6 border-b border-l border-border px-4 pb-0">
           {bars.map((b) => (
             <div key={b.label} className="flex flex-1 flex-col items-center justify-end gap-2">
@@ -628,9 +627,8 @@ function ProductsSection() {
                 <Td>{p.stock}</Td>
                 <Td>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${
-                      p.published ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
-                    }`}
+                    className={`rounded-full px-2 py-0.5 text-xs ${p.published ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
+                      }`}
                   >
                     {p.published ? "Published" : "Draft"}
                   </span>
@@ -838,9 +836,8 @@ function ProgrammesSection() {
                 </Td>
                 <Td>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${
-                      p.published ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
-                    }`}
+                    className={`rounded-full px-2 py-0.5 text-xs ${p.published ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
+                      }`}
                   >
                     {p.published ? "Published" : "Draft"}
                   </span>
@@ -1063,13 +1060,12 @@ function SchoolsSection() {
                 <Td>{s.model}</Td>
                 <Td>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${
-                      s.status === "active"
+                    className={`rounded-full px-2 py-0.5 text-xs ${s.status === "active"
                         ? "bg-green-100 text-green-700"
                         : s.status === "prospect"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-secondary text-muted-foreground"
-                    }`}
+                      }`}
                   >
                     {s.status}
                   </span>
@@ -1278,9 +1274,8 @@ function TeachersSection() {
                 <Td>{t.schools?.name ?? "—"}</Td>
                 <Td>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${
-                      t.status === "active" ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
-                    }`}
+                    className={`rounded-full px-2 py-0.5 text-xs ${t.status === "active" ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
+                      }`}
                   >
                     {t.status}
                   </span>
@@ -1467,17 +1462,15 @@ function UsersSection() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => toggleRole(u.id, "admin", !u.roles.includes("admin"))}
-                      className={`text-xs hover:underline ${
-                        u.roles.includes("admin") ? "text-destructive" : "text-primary"
-                      }`}
+                      className={`text-xs hover:underline ${u.roles.includes("admin") ? "text-destructive" : "text-primary"
+                        }`}
                     >
                       {u.roles.includes("admin") ? "Revoke admin" : "Make admin"}
                     </button>
                     <button
                       onClick={() => toggleRole(u.id, "editor", !u.roles.includes("editor"))}
-                      className={`text-xs hover:underline ${
-                        u.roles.includes("editor") ? "text-destructive" : "text-primary"
-                      }`}
+                      className={`text-xs hover:underline ${u.roles.includes("editor") ? "text-destructive" : "text-primary"
+                        }`}
                     >
                       {u.roles.includes("editor") ? "Revoke editor" : "Make editor"}
                     </button>

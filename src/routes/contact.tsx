@@ -151,7 +151,8 @@ function Contact() {
             <div className="rounded-xl border border-border bg-secondary/40 p-6">
               <h2 className="font-semibold">Head office</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                4th Floor, Innovation House, Baner Road, Pune 411045, Maharashtra, India
+                Sitapura Industrial Area, Jaipur 302001, Rajasthan, India
+
               </p>
             </div>
           </div>

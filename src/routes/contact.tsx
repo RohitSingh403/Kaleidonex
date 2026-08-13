@@ -138,9 +138,9 @@ function Contact() {
 
           <div className="grid gap-5 self-start">
             {[
-              ["Partnerships", "partnerships@KaleidoNex.example", "+91 9798243828"],
-              ["Support", "support@KaleidoNex.example", "Mon–Sat, 9:30am–6:30pm IST"],
-              ["Careers", "careers@KaleidoNex.example", "Trainers, engineers, programme managers"],
+              ["Partnerships", "partnerships@kaleidonex.com", "+91 9798243828"],
+              ["Support", "support@kaleidonex.comxample", "Mon–Sat, 9:30am–6:30pm IST"],
+              ["Careers", "careers@kaleidonex.com", "Trainers, engineers, programme managers"],
             ].map(([title, a, b]) => (
               <div key={title} className="rounded-xl border border-border bg-card p-6 shadow-soft">
                 <h2 className="font-semibold">{title}</h2>

@@ -181,7 +181,7 @@ function Demo() {
               <li>3. You receive a costed rollout plan and reference schools.</li>
             </ol>
             <p className="mt-6 text-sm text-muted-foreground">
-              Prefer to talk now? Call +91 9798243828 or email partnerships@KaleidoNex.example.
+              Prefer to talk now? Call +91 9798243828 or email partnerships@kaleidonex.com.
             </p>
           </aside>
         </div>

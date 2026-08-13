@@ -138,7 +138,7 @@ function Contact() {
 
           <div className="grid gap-5 self-start">
             {[
-              ["Partnerships", "partnerships@KaleidoNex.example", "+91 98000 00000"],
+              ["Partnerships", "partnerships@KaleidoNex.example", "+91 9798243828"],
               ["Support", "support@KaleidoNex.example", "Mon–Sat, 9:30am–6:30pm IST"],
               ["Careers", "careers@KaleidoNex.example", "Trainers, engineers, programme managers"],
             ].map(([title, a, b]) => (

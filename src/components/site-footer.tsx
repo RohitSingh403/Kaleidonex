@@ -41,7 +41,7 @@ export function SiteFooter() {
           <h3 className="text-sm font-semibold uppercase tracking-wide opacity-70">Talk to us</h3>
           <ul className="mt-4 space-y-2 break-words text-sm opacity-90">
             <li>partnerships@KaleidoNex.example</li>
-            <li>+91 98000 00000</li>
+            <li>+91 9798243828</li>
             <li>Mon–Sat, 9:30am–6:30pm IST</li>
           </ul>
         </div>

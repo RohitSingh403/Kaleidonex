@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Building2, Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase, BACKEND_UNAVAILABLE } from "@/lib/supabase-optional";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -17,6 +17,12 @@ export const Route = createFileRoute("/auth")({
 
 const DENIED = "Access denied. This portal is restricted to administrators.";
 
+function requireClient() {
+  const client = getSupabase();
+  if (!client) throw new Error(BACKEND_UNAVAILABLE);
+  return client;
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -28,6 +34,7 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   async function ensureAdminOrDeny() {
+    const supabase = requireClient();
     const { data: userData } = await supabase.auth.getUser();
     const userId = userData.user?.id;
     if (!userId) throw new Error(DENIED);
@@ -49,6 +56,7 @@ function AuthPage() {
     setLoading(true);
 
     try {
+      const supabase = requireClient();
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) throw signInError;
       await ensureAdminOrDeny();
@@ -66,6 +74,11 @@ function AuthPage() {
     setNotice(null);
     if (!email) {
       setError("Enter your email address first, then select Forgot password.");
+      return;
+    }
+    const supabase = getSupabase();
+    if (!supabase) {
+      setError(BACKEND_UNAVAILABLE);
       return;
     }
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {

@@ -2,6 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import heroImage from "@/assets/hero-lab.jpg";
 import { Card, CtaBand, Section, SectionHeading, Eyebrow } from "@/components/ui-kit";
 import { Reveal } from "@/components/reveal";
+import { HeroSpotlight } from "@/components/hero-spotlight";
+import { CountUp } from "@/components/count-up";
+
 
 
 export const Route = createFileRoute("/")({
@@ -24,12 +27,14 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const stats = [
-  { value: "480+", label: "Partner schools" },
-  { value: "3.2L", label: "Students taught" },
-  { value: "6,500", label: "Teachers trained" },
-  { value: "72", label: "Cities across India" },
+const stats: { value: number; suffix: string; decimals?: number; label: string }[] = [
+  { value: 480, suffix: "+", label: "Partner schools" },
+  { value: 3.2, suffix: "L", decimals: 1, label: "Students taught" },
+  { value: 6500, suffix: "", label: "Teachers trained" },
+  { value: 72, suffix: "", label: "Cities across India" },
 ];
+
+
 
 const programs = [
   {
@@ -113,8 +118,9 @@ const faqs = [
 function Home() {
   return (
     <>
-      <section className="surface-grid border-b border-border">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 md:py-24 lg:grid-cols-2">
+      <section className="surface-grid relative isolate overflow-hidden border-b border-border">
+        <HeroSpotlight />
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 md:py-24 lg:grid-cols-2">
           <div>
             <Reveal>
               <Eyebrow>Future-ready education, delivered</Eyebrow>
@@ -134,13 +140,13 @@ function Home() {
             <Reveal delay={270} className="mt-8 flex flex-wrap gap-3">
               <Link
                 to="/demo"
-                className="inline-flex items-center rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft hover:-translate-y-0.5 hover:shadow-lift active:translate-y-0"
+                className="btn-shimmer inline-flex items-center rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft"
               >
                 Book a demo
               </Link>
               <Link
                 to="/solutions"
-                className="inline-flex items-center rounded-md border border-border bg-card px-6 py-3 text-sm font-semibold hover:-translate-y-0.5 hover:bg-secondary hover:shadow-soft active:translate-y-0"
+                className="btn-press inline-flex items-center rounded-md border border-border bg-card px-6 py-3 text-sm font-semibold hover:bg-secondary"
               >
                 Explore solutions
               </Link>
@@ -171,11 +177,14 @@ function Home() {
           {stats.map((s, i) => (
             <Reveal key={s.label} delay={i * 90}>
               <dt className="text-sm text-muted-foreground">{s.label}</dt>
-              <dd className="mt-1 font-display text-3xl font-bold text-primary">{s.value}</dd>
+              <dd className="mt-1 font-display text-3xl font-bold text-primary">
+                <CountUp value={s.value} suffix={s.suffix} decimals={s.decimals ?? 0} />
+              </dd>
             </Reveal>
           ))}
         </dl>
       </Section>
+
 
       <Section>
         <SectionHeading

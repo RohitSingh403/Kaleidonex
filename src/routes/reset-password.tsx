@@ -1,7 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { Building2, CheckCircle2, Eye, EyeOff, Lock } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase, BACKEND_UNAVAILABLE } from "@/lib/supabase-optional";
+const supabase = new Proxy({} as NonNullable<ReturnType<typeof getSupabase>>, {
+  get(_t, prop) {
+    const client = getSupabase();
+    if (!client) throw new Error(BACKEND_UNAVAILABLE);
+    return Reflect.get(client, prop, client);
+  },
+});
 
 export const Route = createFileRoute("/reset-password")({
   ssr: false,

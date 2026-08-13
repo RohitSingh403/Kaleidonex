@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { PageHero, Section } from "@/components/ui-kit";
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabase, BACKEND_UNAVAILABLE } from "@/lib/supabase-optional";
 
 export const Route = createFileRoute("/demo")({
   head: () => ({
@@ -56,7 +56,13 @@ function Demo() {
     setSubmitting(true);
     setServerError(null);
 
-    const { error: insertError } = await supabase.from("leads").insert({
+    const client = getSupabase();
+    if (!client) {
+      setSubmitting(false);
+      setServerError(BACKEND_UNAVAILABLE);
+      return;
+    }
+    const { error: insertError } = await client.from("leads").insert({
       type: "demo",
       name,
       email,

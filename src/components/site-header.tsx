@@ -40,8 +40,8 @@ export function SiteHeader() {
               key={item.to}
               to={item.to}
               activeOptions={{ exact: item.to === "/" }}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              activeProps={{ className: "text-foreground bg-secondary" }}
+              className="nav-underline rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              activeProps={{ className: "text-foreground" }}
             >
               {item.label}
             </Link>
@@ -51,17 +51,18 @@ export function SiteHeader() {
         <div className="hidden items-center gap-2 md:flex">
           <Link
             to="/auth"
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            className="btn-press rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
             Login
           </Link>
           <Link
             to="/demo"
-            className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-soft transition-colors hover:bg-primary/90"
+            className="btn-shimmer inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-soft"
           >
             Request a demo
           </Link>
         </div>
+
 
         <button
           type="button"

@@ -482,8 +482,77 @@ export const publishAnnouncement = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
     await logAudit(context, { action: "announcement.publish", target_type: "announcement", target_name: data.title });
+
+    // Fan the announcement out to the matching audience as in-app + email alerts.
+    try {
+      let recipients = context.supabase.from("employee_profile").select("user_id");
+      if (data.audience === "department" && data.department_id) {
+        recipients = recipients.eq("department_id", data.department_id);
+      } else if (data.audience === "team") {
+        recipients = recipients.eq("manager_id", context.userId);
+      }
+      const { data: people } = await recipients;
+      const { notify } = await import("@/lib/approvals.server");
+      await notify(
+        context.supabase,
+        (people ?? [])
+          .filter((p: { user_id: string }) => p.user_id !== context.userId)
+          .map((p: { user_id: string }) => ({
+            user_id: p.user_id,
+            title: `Announcement: ${data.title}`,
+            body: data.body.slice(0, 280),
+            kind: "announcement",
+            link: "/admin?view=announcements",
+          })),
+      );
+    } catch {
+      /* announcement delivery is best effort */
+    }
     return { ok: true };
   });
+
+/**
+ * Sends an attendance reminder to every active employee who has not marked
+ * attendance for the given day (defaults to today).
+ */
+export const sendAttendanceReminders = createServerFn({ method: "POST" })
+  .middleware([requireManager])
+  .inputValidator((input: { work_date?: string }) => input)
+  .handler(async ({ data, context }) => {
+    const day = data.work_date || new Date().toISOString().slice(0, 10);
+
+    const [{ data: people }, { data: marked }] = await Promise.all([
+      context.supabase.from("employee_profile").select("user_id, status"),
+      context.supabase.from("attendance").select("user_id").eq("work_date", day),
+    ]);
+
+    const done = new Set((marked ?? []).map((a: { user_id: string }) => a.user_id));
+    const pending = (people ?? []).filter(
+      (p: { user_id: string; status: string | null }) =>
+        (p.status ?? "active").toLowerCase() !== "inactive" && !done.has(p.user_id),
+    );
+
+    const { notify } = await import("@/lib/approvals.server");
+    await notify(
+      context.supabase,
+      pending.map((p: { user_id: string }) => ({
+        user_id: p.user_id,
+        title: "Attendance reminder",
+        body: `Your attendance for ${day} has not been marked yet. Please check in from your workspace.`,
+        kind: "attendance",
+        link: "/admin?view=attendance",
+      })),
+    );
+
+    await logAudit(context, {
+      action: "attendance.remind",
+      target_type: "attendance",
+      target_name: day,
+      details: `${pending.length} reminders sent`,
+    });
+    return { ok: true, sent: pending.length };
+  });
+
 
 export const deleteAnnouncement = createServerFn({ method: "POST" })
   .middleware([requireManager])

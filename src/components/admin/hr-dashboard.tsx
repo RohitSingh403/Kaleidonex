@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import {
   Users,
   UserCheck,
@@ -10,6 +11,7 @@ import {
   Inbox,
   ListTodo,
   AlertTriangle,
+  BellRing,
   Download,
   Megaphone,
 } from "lucide-react";
@@ -20,7 +22,9 @@ import {
   getAnnouncements,
   publishAnnouncement,
   deleteAnnouncement,
+  sendAttendanceReminders,
 } from "@/lib/workforce.functions";
+
 import { getPendingApprovals, decideApproval } from "@/lib/team.functions";
 import { ATTENDANCE_LABEL, TASK_STATUS_LABEL, downloadCsv, pct } from "@/lib/workforce.constants";
 import {
@@ -31,10 +35,12 @@ import {
   PercentBar,
   TabBar,
   Field,
+  Btn,
   inputClass,
   btnPrimary,
   btnGhost,
 } from "@/components/admin/workforce-ui";
+
 import { Employee360 } from "@/components/admin/employee-360";
 import { CLAIM_ESCALATION_LIMIT } from "@/lib/claim-limits";
 
@@ -65,7 +71,10 @@ export function HrDashboard({ initialTab = "dashboard" }: { initialTab?: HrTab }
   const [search, setSearch] = useState("");
   const [dept, setDept] = useState("all");
   const [msg, setMsg] = useState("");
+  const [remindBusy, setRemindBusy] = useState(false);
+  const remind = useServerFn(sendAttendanceReminders);
   const qc = useQueryClient();
+
 
   const fetchSnap = useServerFn(getWorkforceSnapshot);
   const fetchApprovals = useServerFn(getPendingApprovals);
@@ -425,7 +434,31 @@ export function HrDashboard({ initialTab = "dashboard" }: { initialTab?: HrTab }
 
       {tab === "announcements" ? (
         <div className="space-y-5">
+          <Panel
+            title="Attendance reminders"
+            description="Alert everyone who has not marked attendance today (in-app + email)."
+          >
+            <Btn
+              icon={BellRing}
+              loading={remindBusy}
+              onClick={async () => {
+                setRemindBusy(true);
+                try {
+                  const res = await remind({ data: {} });
+                  toast.success(`${res.sent} reminder${res.sent === 1 ? "" : "s"} sent`);
+                } catch (e) {
+                  toast.error((e as Error).message);
+                } finally {
+                  setRemindBusy(false);
+                }
+              }}
+            >
+              Send attendance reminders
+            </Btn>
+          </Panel>
+
           <Panel title="Publish announcement">
+
             <form onSubmit={submitAnnouncement} className="grid gap-3 sm:grid-cols-2">
               <Field label="Title">
                 <input name="title" required className={inputClass} />

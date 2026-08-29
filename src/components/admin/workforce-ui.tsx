@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
+
 
 export function Kpi({
   label,
@@ -115,12 +117,17 @@ export function TabBar<T extends string>({
   onChange: (t: T) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1">
+    <div
+      role="tablist"
+      className="-mx-1 flex gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1 sm:mx-0 sm:flex-wrap sm:overflow-visible"
+    >
       {tabs.map((t) => (
         <button
           key={t.id}
+          role="tab"
+          aria-selected={value === t.id}
           onClick={() => onChange(t.id)}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
             value === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary"
           }`}
         >
@@ -130,6 +137,7 @@ export function TabBar<T extends string>({
     </div>
   );
 }
+
 
 export function DataTable({
   headers,
@@ -183,10 +191,56 @@ export const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-accent";
 
 export const btnPrimary =
-  "inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5";
+  "inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-60";
 
 export const btnGhost =
-  "inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-secondary";
+  "inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-secondary disabled:pointer-events-none disabled:opacity-60";
+
+/**
+ * Standard action button. Handles the disabled + busy states consistently so
+ * every dashboard behaves the same while a mutation is in flight.
+ */
+export function Btn({
+  children,
+  onClick,
+  loading = false,
+  disabled = false,
+  variant = "primary",
+  type = "button",
+  icon: Icon,
+  title,
+  className = "",
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  loading?: boolean;
+  disabled?: boolean;
+  variant?: "primary" | "ghost";
+  type?: "button" | "submit";
+  icon?: LucideIcon;
+  title?: string;
+  className?: string;
+}) {
+  const base = variant === "primary" ? btnPrimary : btnGhost;
+  return (
+    <button
+      type={type}
+      title={title}
+      onClick={onClick}
+      disabled={disabled || loading}
+      aria-busy={loading}
+      className={`${base} ${className}`}
+    >
+      {loading ? (
+        <Loader2 className={variant === "primary" ? "h-4 w-4 animate-spin" : "h-3.5 w-3.5 animate-spin"} />
+      ) : Icon ? (
+        <Icon className={variant === "primary" ? "h-4 w-4" : "h-3.5 w-3.5"} />
+      ) : null}
+      {loading ? "Working…" : children}
+    </button>
+  );
+}
+
 
 export function Drawer({
   open,

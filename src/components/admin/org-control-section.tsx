@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, Banknote, Gauge, Settings2, Trash2, Wallet } from "lucide-react";
+import { AlertTriangle, Banknote, Download, Gauge, Settings2, Trash2, Users, Wallet } from "lucide-react";
 import {
   Bar,
+  Btn,
   DataTable,
   EmptyState,
   Field,
@@ -18,6 +19,7 @@ import {
   btnPrimary,
   inputClass,
 } from "@/components/admin/workforce-ui";
+
 import {
   deleteStaffAccount,
   getExecAnalytics,
@@ -70,10 +72,68 @@ function AnalyticsTab() {
   const d = q.data!;
   const maxSpend = Math.max(1, ...d.spendTrend.map((s) => s.claims + s.payroll));
   const maxFlow = Math.max(1, ...d.approvalThroughput.map((a) => Math.max(a.raised, a.closed)));
+  const maxHead = Math.max(1, ...d.headcountTrend.map((h) => h.headcount));
+  const maxDept = Math.max(1, ...d.deptCosts.map((c) => c.total));
+
+  function downloadReport() {
+    const rows: string[][] = [
+      ["Kaleidonex executive report", new Date().toLocaleString("en-IN")],
+      [],
+      ["Metric", "Value"],
+      ["Monthly payroll", String(d.payrollMonthly)],
+      ["Claims approved", String(d.claimsApproved)],
+      ["Claims pending", String(d.claimsPending)],
+      ["Approval SLA (hours)", String(d.slaHours)],
+      ["Open approvals", String(d.openApprovals)],
+      ["Attrition rate (%)", String(d.attrition.rate)],
+      ["Leavers (12m)", String(d.attrition.leavers12m)],
+      ["Average headcount", String(d.attrition.avgHeadcount)],
+      [],
+      ["Month", "Headcount", "Joiners", "Leavers", "Payroll", "Claims"],
+      ...d.headcountTrend.map((h, i) => [
+        h.label,
+        String(h.headcount),
+        String(h.joiners),
+        String(h.leavers),
+        String(d.spendTrend[i - (d.headcountTrend.length - d.spendTrend.length)]?.payroll ?? ""),
+        String(d.spendTrend[i - (d.headcountTrend.length - d.spendTrend.length)]?.claims ?? ""),
+      ]),
+      [],
+      ["Department", "Headcount", "Payroll", "Claims", "Total cost", "Cost per head"],
+      ...d.deptCosts.map((c) => [
+        c.name,
+        String(c.headcount),
+        String(c.payroll),
+        String(c.claims),
+        String(c.total),
+        String(c.perHead),
+      ]),
+      [],
+      ["Department", "Cost centre", "Budget", "Spent", "Used %"],
+      ...d.budgets.map((b) => [b.name, b.cost_center, String(b.budget), String(b.spent), String(b.usedPct)]),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `kaleidonex-executive-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Executive report downloaded");
+  }
+
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">Company-wide workforce, cost and approval performance.</p>
+        <Btn variant="ghost" icon={Download} onClick={downloadReport}>
+          Download report (CSV)
+        </Btn>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+
         <Kpi label="Monthly payroll" value={money(d.payrollMonthly)} icon={Banknote} />
         <Kpi label="Claims approved" value={money(d.claimsApproved)} icon={Wallet} tone="good" />
         <Kpi label="Claims pending" value={money(d.claimsPending)} tone="warn" />
@@ -123,6 +183,89 @@ function AnalyticsTab() {
           </div>
         </Panel>
       </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel title="Workforce growth" description="Headcount, joiners and leavers over 12 months">
+          <div className="flex h-48 items-end gap-2">
+            {d.headcountTrend.map((h) => (
+              <div key={h.label} className="flex flex-1 flex-col items-center gap-1">
+                <div className="flex h-40 w-full items-end justify-center gap-[2px]">
+                  <div
+                    className="w-1/2 rounded-t bg-primary/70"
+                    style={{ height: `${(h.headcount / maxHead) * 100}%` }}
+                    title={`${h.headcount} employees`}
+                  />
+                  <div
+                    className="w-1/5 rounded-t bg-emerald-500/80"
+                    style={{ height: `${(h.joiners / maxHead) * 100}%` }}
+                    title={`${h.joiners} joiners`}
+                  />
+                  <div
+                    className="w-1/5 rounded-t bg-destructive/80"
+                    style={{ height: `${(h.leavers / maxHead) * 100}%` }}
+                    title={`${h.leavers} leavers`}
+                  />
+                </div>
+                <span className="text-[10px] text-muted-foreground">{h.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <i className="h-2 w-2 rounded-full bg-primary/70" /> Headcount
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <i className="h-2 w-2 rounded-full bg-emerald-500/80" /> Joiners
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <i className="h-2 w-2 rounded-full bg-destructive/80" /> Leavers
+            </span>
+          </div>
+        </Panel>
+
+        <Panel title="Attrition outlook" description="Rolling 12-month attrition and risk signal">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Kpi
+              label="Attrition rate"
+              value={`${d.attrition.rate}%`}
+              icon={Users}
+              tone={d.attrition.risk === "high" ? "bad" : d.attrition.risk === "moderate" ? "warn" : "good"}
+              hint={`${d.attrition.risk} risk`}
+            />
+            <Kpi label="Leavers (12m)" value={String(d.attrition.leavers12m)} />
+            <Kpi label="Avg headcount" value={String(d.attrition.avgHeadcount)} />
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {d.attrition.risk === "high"
+              ? "Attrition is above 20% — prioritise retention reviews and 1:1s with at-risk teams."
+              : d.attrition.risk === "moderate"
+                ? "Attrition is in the 10–20% band. Watch departments with the highest cost per head."
+                : "Attrition is healthy. Keep monitoring joiners vs leavers each month."}
+          </p>
+        </Panel>
+      </div>
+
+      <Panel title="Department cost breakdown" description="Payroll plus claims by department">
+        {d.deptCosts.length === 0 ? (
+          <EmptyState title="No department costs yet" hint="Assign employees to departments to see the breakdown." />
+        ) : (
+          <div className="space-y-3">
+            {d.deptCosts.map((c) => (
+              <div key={c.id || "unassigned"} className="space-y-1">
+                <PercentBar
+                  label={`${c.name} · ${c.headcount} people — ${money(c.total)}`}
+                  pctValue={Math.round((c.total / maxDept) * 100)}
+                  tone="bg-primary/70"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Payroll {money(c.payroll)} · Claims {money(c.claims)} · Cost per head {money(c.perHead)}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </Panel>
+
 
       <Panel title="Budget utilisation by department">
         {d.budgets.length === 0 ? (

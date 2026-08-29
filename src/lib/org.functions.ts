@@ -86,6 +86,17 @@ export type ExecAnalytics = {
   approvalThroughput: { label: string; raised: number; closed: number }[];
   slaHours: number;
   openApprovals: number;
+  headcountTrend: { label: string; headcount: number; joiners: number; leavers: number }[];
+  attrition: { rate: number; leavers12m: number; avgHeadcount: number; risk: "low" | "moderate" | "high" };
+  deptCosts: {
+    id: string;
+    name: string;
+    headcount: number;
+    payroll: number;
+    claims: number;
+    total: number;
+    perHead: number;
+  }[];
 };
 
 export const getExecAnalytics = createServerFn({ method: "GET" })
@@ -93,11 +104,14 @@ export const getExecAnalytics = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<ExecAnalytics> => {
     const [deptRes, claimsRes, salaryRes, reqRes, profileRes] = await Promise.all([
       context.supabase.from("departments").select("id, name, cost_center, budget, spent").order("name"),
-      context.supabase.from("expense_claims").select("amount, status, created_at"),
+      context.supabase.from("expense_claims").select("amount, status, created_at, user_id"),
       context.supabase.from("salary_records").select("net_pay, period_month, period_year, status"),
       context.supabase.from("approval_requests").select("state, created_at, decided_at"),
-      context.supabase.from("employee_profile").select("salary, status"),
+      context.supabase
+        .from("employee_profile")
+        .select("user_id, salary, status, department_id, joining_date, updated_at"),
     ]);
+
 
     const claims = claimsRes.data ?? [];
     const requests = reqRes.data ?? [];
@@ -156,6 +170,65 @@ export const getExecAnalytics = createServerFn({ method: "GET" })
           ) / decided.length,
         )
       : 0;
+    // ── Workforce trend, attrition and per-department cost ──
+    const people = profileRes.data ?? [];
+    const isLeaver = (p: (typeof people)[number]) => (p.status ?? "active").toLowerCase() === "inactive";
+
+    const headcountTrend: { label: string; headcount: number; joiners: number; leavers: number }[] = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i, 1);
+      const key = d.toISOString().slice(0, 7);
+      const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10);
+      headcountTrend.push({
+        label: d.toLocaleString("en-IN", { month: "short" }),
+        headcount: people.filter(
+          (p) =>
+            (p.joining_date ?? "") !== "" &&
+            String(p.joining_date) <= monthEnd &&
+            !(isLeaver(p) && String(p.updated_at ?? "").slice(0, 7) <= key),
+        ).length,
+        joiners: people.filter((p) => String(p.joining_date ?? "").slice(0, 7) === key).length,
+        leavers: people.filter((p) => isLeaver(p) && String(p.updated_at ?? "").slice(0, 7) === key).length,
+      });
+    }
+
+    const leavers12m = headcountTrend.reduce((s, m) => s + m.leavers, 0);
+    const avgHeadcount = Math.max(
+      1,
+      Math.round(headcountTrend.reduce((s, m) => s + m.headcount, 0) / Math.max(1, headcountTrend.length)),
+    );
+    const rate = Math.round((leavers12m / avgHeadcount) * 1000) / 10;
+
+    const claimsByUser = new Map<string, number>();
+    for (const c of claims) {
+      if (c.status === "rejected") continue;
+      const uid = String((c as { user_id?: string }).user_id ?? "");
+      if (!uid) continue;
+      claimsByUser.set(uid, (claimsByUser.get(uid) ?? 0) + Number(c.amount || 0));
+    }
+
+    const deptCosts = [
+      ...(deptRes.data ?? []).map((d) => ({ id: d.id as string, name: d.name as string })),
+      { id: "", name: "Unassigned" },
+    ]
+      .map((d) => {
+        const members = people.filter((p) => String(p.department_id ?? "") === d.id && !isLeaver(p));
+        const payroll = members.reduce((s, p) => s + Number(p.salary || 0), 0);
+        const claimTotal = members.reduce((s, p) => s + (claimsByUser.get(String(p.user_id)) ?? 0), 0);
+        const total = payroll + claimTotal;
+        return {
+          id: d.id,
+          name: d.name,
+          headcount: members.length,
+          payroll,
+          claims: claimTotal,
+          total,
+          perHead: members.length ? Math.round(total / members.length) : 0,
+        };
+      })
+      .filter((d) => d.headcount > 0)
+      .sort((a, b) => b.total - a.total);
 
     return {
       payrollMonthly,
@@ -169,7 +242,16 @@ export const getExecAnalytics = createServerFn({ method: "GET" })
       slaHours,
       openApprovals: requests.filter((r) => !["REJECTED", "CANCELLED", "HR_APPROVED", "CEO_APPROVED"].includes(r.state))
         .length,
+      headcountTrend,
+      attrition: {
+        rate,
+        leavers12m,
+        avgHeadcount,
+        risk: rate >= 20 ? "high" : rate >= 10 ? "moderate" : "low",
+      },
+      deptCosts,
     };
+
   });
 
 // ─── Account removal (CEO / super admin only) ────────────

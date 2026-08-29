@@ -7,6 +7,7 @@ import {
   updateClaimStatus,
   deleteExpenseClaim,
 } from "@/lib/claims.functions";
+import { getMyAccess } from "@/lib/team.functions";
 
 type SubTab = "dashboard" | "mine" | "apply";
 
@@ -223,6 +224,7 @@ function ClaimDashboard({ onNew, onViewAll }: { onNew: () => void; onViewAll: ()
 
 function MyClaims({ onNew }: { onNew: () => void }) {
   const fetchClaims = useServerFn(getExpenseClaims);
+  const fetchAccess = useServerFn(getMyAccess);
   const statusFn = useServerFn(updateClaimStatus);
   const removeFn = useServerFn(deleteExpenseClaim);
   const queryClient = useQueryClient();
@@ -231,17 +233,32 @@ function MyClaims({ onNew }: { onNew: () => void }) {
   const [open, setOpen] = useState<Claim | null>(null);
 
   const { data, isLoading } = useQuery({ queryKey: ["expense-claims"], queryFn: () => fetchClaims() });
+  const { data: access } = useQuery({ queryKey: ["my-access"], queryFn: () => fetchAccess() });
   const rows = ((data ?? []) as Claim[]).filter((c) => !status || c.status === status);
 
+  const isApprover = Boolean(access?.isHr || access?.isSuper);
+  /** Employees never decide claims; approvers never decide their own. */
+  const canDecide = (c: Claim) =>
+    isApprover && (access?.isSuper ? true : c.user_id !== access?.userId);
+
   async function change(id: string, next: Claim["status"]) {
-    await statusFn({ data: { id, status: next } });
-    queryClient.invalidateQueries({ queryKey: ["expense-claims"] });
+    try {
+      await statusFn({ data: { id, status: next } });
+      queryClient.invalidateQueries({ queryKey: ["expense-claims"] });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Could not update this claim.");
+    }
   }
   async function remove(id: string) {
     if (!confirm("Delete this claim?")) return;
-    await removeFn({ data: { id } });
-    queryClient.invalidateQueries({ queryKey: ["expense-claims"] });
+    try {
+      await removeFn({ data: { id } });
+      queryClient.invalidateQueries({ queryKey: ["expense-claims"] });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Could not delete this claim.");
+    }
   }
+
 
   return (
     <Card
@@ -319,24 +336,29 @@ function MyClaims({ onNew }: { onNew: () => void }) {
                       <button onClick={() => setOpen(c)} className="rounded border border-primary px-2 py-0.5 text-primary">
                         View
                       </button>
-                      {c.status === "pending" && (
+                      {canDecide(c) && c.status === "pending" && (
                         <button onClick={() => change(c.id, "approved")} className="text-emerald-600 hover:underline">
                           Approve
                         </button>
                       )}
-                      {c.status === "approved" && (
+                      {canDecide(c) && c.status === "approved" && (
                         <button onClick={() => change(c.id, "paid")} className="text-teal-600 hover:underline">
                           Mark paid
                         </button>
                       )}
-                      {c.status !== "rejected" && c.status !== "paid" && (
+                      {canDecide(c) && c.status !== "rejected" && c.status !== "paid" && (
                         <button onClick={() => change(c.id, "rejected")} className="text-muted-foreground hover:underline">
                           Reject
                         </button>
                       )}
-                      <button onClick={() => remove(c.id)} className="text-destructive hover:underline">
-                        Delete
-                      </button>
+                      {!canDecide(c) && c.status === "pending" && (
+                        <span className="text-muted-foreground">Awaiting HR approval</span>
+                      )}
+                      {(canDecide(c) || c.status === "pending") && (
+                        <button onClick={() => remove(c.id)} className="text-destructive hover:underline">
+                          {canDecide(c) ? "Delete" : "Withdraw"}
+                        </button>
+                      )}
                     </div>
                   </Td>
                 </tr>

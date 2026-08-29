@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/lib/require-admin";
+import { openRequestSafe } from "@/lib/approvals.server";
+
 
 export type AttendanceStatus = "present" | "absent" | "half_day" | "leave" | "paid_leave" | "holiday";
 
@@ -58,12 +60,27 @@ export const applyLeave = createServerFn({ method: "POST" })
     }) => input,
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
+    const { data: inserted, error } = await context.supabase
       .from("leave_applications")
-      .insert({ ...data, user_id: context.userId });
+      .insert({ ...data, user_id: context.userId })
+      .select("id")
+      .maybeSingle();
     if (error) throw new Error(error.message);
+    await openRequestSafe(
+      context.supabase,
+      { userId: context.userId, isHr: context.isHr, role: context.roles[0] ?? "employee" },
+      {
+        kind: "leave",
+        resource_table: "leave_applications",
+        resource_id: (inserted?.id as string) ?? null,
+        title: `${data.leave_type} leave — ${data.start_date} to ${data.end_date}`,
+        summary: data.reason,
+        amount: data.days,
+      },
+    );
     return { ok: true };
   });
+
 
 export const getSalaryRecords = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
@@ -94,9 +111,23 @@ export const createEmployeeRequest = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((input: { request_type: string; details: string; note: string }) => input)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
+    const { data: inserted, error } = await context.supabase
       .from("employee_requests")
-      .insert({ ...data, user_id: context.userId });
+      .insert({ ...data, user_id: context.userId })
+      .select("id")
+      .maybeSingle();
     if (error) throw new Error(error.message);
+    await openRequestSafe(
+      context.supabase,
+      { userId: context.userId, isHr: context.isHr, role: context.roles[0] ?? "employee" },
+      {
+        kind: "employee_request",
+        resource_table: "employee_requests",
+        resource_id: (inserted?.id as string) ?? null,
+        title: data.request_type,
+        summary: data.details || data.note,
+      },
+    );
+
     return { ok: true };
   });

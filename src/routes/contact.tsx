@@ -6,13 +6,13 @@ import { getSupabase, BACKEND_UNAVAILABLE } from "@/lib/supabase-optional";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact KaleidoNex — Partnerships, Support & Careers" },
+      { title: "Contact Kaleidonex — Partnerships, Support & Careers" },
       {
         name: "description",
         content:
-          "Reach the KaleidoNex team for school partnerships, product enquiries, teacher training support or careers.",
+          "Reach the Kaleidonex team for school partnerships, product enquiries, teacher training support or careers.",
       },
-      { property: "og:title", content: "Contact KaleidoNex" },
+      { property: "og:title", content: "Contact Kaleidonex" },
       {
         property: "og:description",
         content: "Partnerships, product enquiries, support and careers — get in touch.",
@@ -138,9 +138,9 @@ function Contact() {
 
           <div className="grid gap-5 self-start">
             {[
-              ["Partnerships", "partnerships@kaleidonex.com", "+91 9798243828"],
-              ["Support", "support@kaleidonex.comxample", "Mon -Sat, 9:30 am - 5:30 pm IST"],
-              ["Careers", "careers@kaleidonex.com", "Trainers, engineers, programme managers"],
+              ["Partnerships", "partnerships@kaleidonex.example", "+91 98000 00000"],
+              ["Support", "support@kaleidonex.example", "Mon–Sat, 9:30am–6:30pm IST"],
+              ["Careers", "careers@kaleidonex.example", "Trainers, engineers, programme managers"],
             ].map(([title, a, b]) => (
               <div key={title} className="rounded-xl border border-border bg-card p-6 shadow-soft">
                 <h2 className="font-semibold">{title}</h2>
@@ -151,9 +151,7 @@ function Contact() {
             <div className="rounded-xl border border-border bg-secondary/40 p-6">
               <h2 className="font-semibold">Head office</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Sitapura RIICO Industrial Area, Jaipur 302001, Rajasthan, India
-
-
+                4th Floor, Innovation House, Baner Road, Pune 411045, Maharashtra, India
               </p>
             </div>
           </div>

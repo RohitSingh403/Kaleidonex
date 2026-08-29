@@ -1,6 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/lib/require-admin";
 
+export type TaskStatus =
+  | "pending"
+  | "todo"
+  | "in_progress"
+  | "review"
+  | "blocked"
+  | "completed";
+
 export type TaskRow = {
   id: string;
   user_id: string;
@@ -8,7 +16,9 @@ export type TaskRow = {
   description: string;
   duration: string;
   priority: string;
-  status: "pending" | "in_progress" | "completed";
+  status: TaskStatus;
+  progress: number;
+  project_id: string | null;
   due_date: string | null;
   created_at: string;
   updated_at: string;
@@ -47,12 +57,15 @@ export const createTask = createServerFn({ method: "POST" })
 export const updateTaskStatus = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator(
-    (input: { id: string; status: "pending" | "in_progress" | "completed" }) => input,
+    (input: { id: string; status: TaskStatus; progress?: number }) => input,
   )
   .handler(async ({ data, context }) => {
+    const patch: { status: TaskStatus; progress?: number } = { status: data.status };
+    if (typeof data.progress === "number") patch.progress = Math.max(0, Math.min(100, data.progress));
+    else if (data.status === "completed") patch.progress = 100;
     const { error } = await context.supabase
       .from("tasks")
-      .update({ status: data.status })
+      .update(patch)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };

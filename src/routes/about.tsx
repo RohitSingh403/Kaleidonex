@@ -4,13 +4,13 @@ import { Card, CtaBand, PageHero, Section, SectionHeading } from "@/components/u
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About KaleidoNex — Building School Innovation Ecosystems" },
+      { title: "About Kaleidonex — Building School Innovation Ecosystems" },
       {
         name: "description",
         content:
-          "KaleidoNex partners with schools and trusts to build lasting AI, robotics and STEM capability through curriculum, labs and teacher training.",
+          "Kaleidonex partners with schools and trusts to build lasting AI, robotics and STEM capability through curriculum, labs and teacher training.",
       },
-      { property: "og:title", content: "About KaleidoNex" },
+      { property: "og:title", content: "About Kaleidonex" },
       {
         property: "og:description",
         content: "Why we build future-skills ecosystems with schools instead of selling courses.",
@@ -33,7 +33,7 @@ function About() {
       <PageHero
         eyebrow="About us"
         title="We build innovation capability inside schools"
-        description="KaleidoNex started in 2016 with one robotics lab. Today we run future-skills programmes across 480 campuses, 72 cities and 6,500 trained teachers."
+        description="Kaleidonex started in 2016 with one robotics lab. Today we run future-skills programmes across 480 campuses, 72 cities and 6,500 trained teachers."
       />
 
       <Section>

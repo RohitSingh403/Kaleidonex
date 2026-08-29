@@ -9,11 +9,14 @@ export const Route = createFileRoute("/_authenticated")({
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
 
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: data.user.id,
-      _role: "admin",
-    });
-    if (!isAdmin) {
+    const { data: roleRows } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.user.id);
+
+    const roles = (roleRows ?? []).map((r) => r.role as string);
+    const allowed = ["admin", "ceo", "hr", "employee"];
+    if (!roles.some((r) => allowed.includes(r))) {
       await supabase.auth.signOut();
       throw redirect({ to: "/auth" });
     }

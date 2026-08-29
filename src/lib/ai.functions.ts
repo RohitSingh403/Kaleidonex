@@ -25,7 +25,7 @@ export const generateTeachingContent = createServerFn({ method: "POST" })
             {
               role: "system",
               content:
-                "You are KaleidoNex AI, an assistant for school teachers building AI, robotics, coding and STEM lessons.",
+                "You are Kaleidonex AI, an assistant for school teachers building AI, robotics, coding and STEM lessons.",
             },
             { role: "user", content: prompt },
           ],

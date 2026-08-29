@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, Trash2, CheckCircle2, Play, RotateCcw, Plus } from "lucide-react";
 import { getTasks, createTask, updateTaskStatus, deleteTask } from "@/lib/tasks.functions";
+import { TaskBoardKanban } from "@/components/admin/task-board-kanban";
 
 function Panel({
   title,
@@ -68,7 +69,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export function TaskBoardSection() {
-  const [view, setView] = useState<"dashboard" | "mytask">("dashboard");
+  const [view, setView] = useState<"dashboard" | "board" | "mytask">("dashboard");
   const fetchTasks = useServerFn(getTasks);
   const createFn = useServerFn(createTask);
   const statusFn = useServerFn(updateTaskStatus);
@@ -97,18 +98,20 @@ export function TaskBoardSection() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-end gap-6 border-b border-border pb-2 text-sm">
-        {(["dashboard", "mytask"] as const).map((v) => (
+        {(["dashboard", "board", "mytask"] as const).map((v) => (
           <button
             key={v}
             onClick={() => setView(v)}
             className={`pb-2 ${view === v ? "border-b-2 border-primary font-medium text-primary" : "text-muted-foreground"}`}
           >
-            {v === "dashboard" ? "Dashboard" : "My Task"}
+            {v === "dashboard" ? "Dashboard" : v === "board" ? "Board" : "My Task"}
           </button>
         ))}
       </div>
 
-      {view === "dashboard" ? (
+      {view === "board" ? (
+        <TaskBoardKanban />
+      ) : view === "dashboard" ? (
         <div className="space-y-5 rounded-xl border border-primary/25 bg-card p-4 md:p-5">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <Ring label="Total Tasks" pct={stats.total ? 100 : 0} caption={`${stats.total} Total`} />

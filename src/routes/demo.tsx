@@ -6,13 +6,13 @@ import { getSupabase, BACKEND_UNAVAILABLE } from "@/lib/supabase-optional";
 export const Route = createFileRoute("/demo")({
   head: () => ({
     meta: [
-      { title: "Request a Demo — KaleidoNex School Programmes" },
+      { title: "Request a Demo — Kaleidonex School Programmes" },
       {
         name: "description",
         content:
-          "Book a 30-minute walkthrough of KaleidoNex's coding, AI, robotics and STEM programme for your school and get a costed rollout plan.",
+          "Book a 30-minute walkthrough of Kaleidonex's coding, AI, robotics and STEM programme for your school and get a costed rollout plan.",
       },
-      { property: "og:title", content: "Request an KaleidoNex Demo" },
+      { property: "og:title", content: "Request an Kaleidonex Demo" },
       {
         property: "og:description",
         content: "Book a 30-minute school walkthrough and receive a rollout plan.",
@@ -181,7 +181,7 @@ function Demo() {
               <li>3. You receive a costed rollout plan and reference schools.</li>
             </ol>
             <p className="mt-6 text-sm text-muted-foreground">
-              Prefer to talk now? Call +91 9798243828 or email partnerships@kaleidonex.com.
+              Prefer to talk now? Call +91 98000 00000 or email partnerships@kaleidonex.example.
             </p>
           </aside>
         </div>

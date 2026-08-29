@@ -106,10 +106,11 @@ export function MyPanelSection({ only }: { only?: SubTab } = {}) {
           <button
             key={t.id}
             onClick={() => setSub(t.id)}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm transition-colors ${sub === t.id
+            className={`-mb-px border-b-2 px-3 py-2 text-sm transition-colors ${
+              sub === t.id
                 ? "border-primary font-semibold text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
+            }`}
           >
             {t.label}
           </button>
@@ -138,7 +139,7 @@ function AttendanceWorkspace() {
         <div>
           <h1 className="text-lg font-semibold">Attendance</h1>
           <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            <span className="text-accent">KaleidoNex</span> / Attendance
+            <span className="text-accent">Kaleidonex</span> / Attendance
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -149,10 +150,11 @@ function AttendanceWorkspace() {
             <button
               key={t.id}
               onClick={() => setView(t.id)}
-              className={`-mb-px border-b-2 px-1 py-2 text-sm transition-colors ${view === t.id
+              className={`-mb-px border-b-2 px-1 py-2 text-sm transition-colors ${
+                view === t.id
                   ? "border-primary font-semibold text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
+              }`}
             >
               {t.label}
             </button>
@@ -172,10 +174,10 @@ function AttendanceWorkspace() {
           Our HR team is here to assist you with any attendance-related queries
         </p>
         <a
-          href="mailto:hr@KaleidoNex.com"
+          href="mailto:hr@kaleidonex.com"
           className="mt-4 inline-flex items-center gap-2 rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-secondary"
         >
-          <Mail className="h-4 w-4" /> Contact HR : hr@KaleidoNex.com
+          <Mail className="h-4 w-4" /> Contact HR : hr@kaleidonex.com
         </a>
       </section>
     </div>
@@ -365,8 +367,8 @@ function EmployeeDashboard({ go }: { go: (t: SubTab) => void }) {
       <Card title="Need help?">
         <p className="text-center text-sm text-muted-foreground">Contact HR for any assistance</p>
         <p className="mt-1 text-center text-sm">
-          <a href="mailto:hr@KaleidoNex.com" className="text-primary hover:underline">
-            hr@KaleidoNex.com
+          <a href="mailto:hr@kaleidonex.com" className="text-primary hover:underline">
+            hr@kaleidonex.com
           </a>
         </p>
       </Card>
@@ -495,8 +497,9 @@ function MarkAttendance({ onDone, onViewMonthly }: { onDone: () => void; onViewM
             <button
               key={s}
               onClick={() => setStatus(s)}
-              className={`px-4 py-2 text-xs font-semibold ${status === s ? "bg-emerald-600 text-white" : "bg-card text-amber-600 hover:bg-secondary"
-                }`}
+              className={`px-4 py-2 text-xs font-semibold ${
+                status === s ? "bg-emerald-600 text-white" : "bg-card text-amber-600 hover:bg-secondary"
+              }`}
             >
               {statusLabels[s]}
             </button>
@@ -711,8 +714,9 @@ function MonthlyAttendance() {
                 <p className="text-xs text-muted-foreground">{day}</p>
                 <div className="mt-1 flex justify-center">
                   <span
-                    className={`grid h-7 w-7 place-items-center rounded-full text-[11px] font-bold text-white ${row ? statusDot[row.status] : "bg-muted"
-                      }`}
+                    className={`grid h-7 w-7 place-items-center rounded-full text-[11px] font-bold text-white ${
+                      row ? statusDot[row.status] : "bg-muted"
+                    }`}
                   >
                     {row ? statusLabels[row.status].slice(0, 1) : ""}
                   </span>

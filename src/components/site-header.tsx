@@ -31,7 +31,7 @@ export function SiteHeader() {
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary font-display text-lg font-bold text-primary-foreground">
             K
           </span>
-          <span className="font-display text-lg font-bold tracking-tight">KaleidoNex</span>
+          <span className="font-display text-lg font-bold tracking-tight">Kaleidonex</span>
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">

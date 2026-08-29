@@ -29,10 +29,26 @@ import {
   type LucideIcon,
   Megaphone,
   MapPinned,
+  BadgeCheck,
+  User as UserIcon,
+  UserCog,
+  Building2,
+  Network,
+  Gauge,
+  BarChart3,
+  ScrollText,
+  History,
+  Bell,
+  Upload,
+  ClipboardList,
+  MessageSquare,
+  Wallet,
+  Settings2,
+  Trash2,
 } from "lucide-react";
 
+
 import {
-  getDashboardStats,
   getLeads,
   updateLeadStatus,
   deleteLead,
@@ -53,6 +69,7 @@ import {
   type AdminUser,
 } from "@/lib/admin.functions";
 import { StudentsSection } from "@/components/admin/students-section";
+import { ApprovalsSection } from "@/components/admin/approvals-section";
 import { ExpenseClaimSection } from "@/components/admin/expense-claim-section";
 import { MyPanelSection } from "@/components/admin/my-panel-section";
 import { TemplatesSection } from "@/components/admin/templates-section";
@@ -60,12 +77,26 @@ import { AiSection } from "@/components/admin/ai-section";
 import { TaskBoardSection } from "@/components/admin/taskboard-section";
 import { SocialMediaSection } from "@/components/admin/social-media-section";
 import { OurCentresSection } from "@/components/admin/our-centres-section";
+import { EmploymentDetailsSection } from "@/components/admin/employment-details-section";
+import { MyProfileSection, type ProfileTab } from "@/components/admin/my-profile-section";
+import { SettingsSection } from "@/components/admin/settings-section";
+import { TeamSection } from "@/components/admin/team-section";
+import { getMyAccess } from "@/lib/team.functions";
+import { ExecDashboard, type ExecTab } from "@/components/admin/exec-dashboard";
+import { HrDashboard, type HrTab } from "@/components/admin/hr-dashboard";
+import { EmployeeHome } from "@/components/admin/employee-home";
+import { NotificationBell } from "@/components/admin/notification-bell";
+import { PeopleOpsSection, type PeopleOpsTab } from "@/components/admin/people-ops-section";
+import { OrgControlSection, type OrgControlTab } from "@/components/admin/org-control-section";
+import { BroadcastSection } from "@/components/admin/broadcast-section";
+import { MyRequestsSection } from "@/components/admin/my-requests-section";
+import { NotificationsSection } from "@/components/admin/notifications-section";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin Dashboard — KaleidoNex" },
+      { title: "Admin Dashboard — Kaleidonex" },
       { name: "description", content: "Manage leads, content, schools, teachers and users." },
     ],
   }),
@@ -74,6 +105,35 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 type Tab =
   | "overview"
+  | "console_exec"
+  | "console_hr"
+  | "console_me"
+  | "exec_hr"
+  | "exec_employees"
+  | "exec_departments"
+  | "exec_org"
+  | "exec_attendance"
+  | "exec_performance"
+  | "exec_reports"
+  | "exec_audit"
+  | "approvals"
+  | "hr_employees"
+  | "hr_attendance"
+  | "hr_leave"
+  | "hr_tasks"
+  | "hr_performance"
+  | "hr_announcements"
+  | "hr_reports"
+  | "hr_analytics"
+  | "hr_bulk"
+  | "hr_onboarding"
+  | "hr_reviews"
+  | "ceo_analytics"
+  | "ceo_budgets"
+  | "ceo_settings"
+  | "ceo_accounts"
+  | "ceo_broadcast"
+  | "team"
   | "students"
   | "claims"
   | "mypanel"
@@ -83,12 +143,46 @@ type Tab =
   | "templates"
   | "ai"
   | "tasks"
+  | "myrequests"
+  | "notifications"
   | "social"
-  | "centres";
+  | "centres"
+  | "employment"
+  | "settings"
+  | "profile";
 
 
 const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: "overview", label: "Dashboard", icon: LayoutDashboard },
+  { id: "console_exec", label: "CEO Dashboard", icon: Building2 },
+  { id: "console_hr", label: "HR Dashboard", icon: UserCog },
+  { id: "console_me", label: "Employee Dashboard", icon: UserCircle },
+  { id: "exec_hr", label: "HR Management", icon: UserCog },
+  { id: "exec_employees", label: "Employees", icon: Users },
+  { id: "exec_departments", label: "Departments", icon: Building2 },
+  { id: "exec_org", label: "Organization", icon: Network },
+  { id: "exec_attendance", label: "Attendance", icon: CalendarCheck },
+  { id: "exec_performance", label: "Performance", icon: Gauge },
+  { id: "exec_reports", label: "Reports & Analytics", icon: BarChart3 },
+  { id: "exec_audit", label: "Audit Logs", icon: ScrollText },
+  { id: "approvals", label: "Approvals", icon: ShieldCheck },
+  { id: "hr_employees", label: "Employees", icon: Users },
+  { id: "hr_attendance", label: "Attendance", icon: CalendarCheck },
+  { id: "hr_leave", label: "Leave Management", icon: Flag },
+  { id: "hr_tasks", label: "Tasks & Projects", icon: ListTodo },
+  { id: "hr_performance", label: "Performance", icon: Gauge },
+  { id: "hr_announcements", label: "Announcements", icon: Megaphone },
+  { id: "hr_reports", label: "Reports", icon: BarChart3 },
+  { id: "hr_analytics", label: "People Analytics", icon: BarChart3 },
+  { id: "hr_bulk", label: "Bulk Attendance", icon: Upload },
+  { id: "hr_onboarding", label: "Onboarding", icon: ClipboardList },
+  { id: "hr_reviews", label: "Reviews & 1:1", icon: MessageSquare },
+  { id: "ceo_analytics", label: "Company Analytics", icon: BarChart3 },
+  { id: "ceo_budgets", label: "Budgets & Cost Centres", icon: Wallet },
+  { id: "ceo_settings", label: "Global Settings", icon: Settings2 },
+  { id: "ceo_broadcast", label: "Announcements & Policies", icon: Megaphone },
+  { id: "ceo_accounts", label: "Account Removal", icon: Trash2 },
+  { id: "team", label: "Team", icon: Users },
   { id: "students", label: "Students", icon: GraduationCap },
   { id: "claims", label: "Expense Claim", icon: Receipt },
   { id: "mypanel", label: "My Panel", icon: UserCircle },
@@ -98,17 +192,117 @@ const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: "templates", label: "Templates", icon: LayoutTemplate },
   { id: "ai", label: "Ai", icon: Sparkles },
   { id: "tasks", label: "My Task", icon: ListTodo },
+  { id: "myrequests", label: "My Requests", icon: History },
+  { id: "notifications", label: "Notifications", icon: Bell },
   { id: "social", label: "Social Media", icon: Megaphone },
   { id: "centres", label: "Our Centres", icon: MapPinned },
 ];
 
+type NavGroup = { title: string; items: Tab[] };
+
+const navGroups: Record<"ceo" | "hr" | "employee", NavGroup[]> = {
+  ceo: [
+    { title: "Consoles", items: ["console_hr", "console_me"] },
+    {
+      title: "Command center",
+      items: ["overview", "exec_hr", "exec_employees", "exec_departments", "exec_org"],
+    },
+    {
+      title: "Analytics & governance",
+      items: [
+        "approvals",
+        "exec_attendance",
+        "exec_performance",
+        "exec_reports",
+        "ceo_analytics",
+        "exec_audit",
+      ],
+    },
+    {
+      title: "Governance controls",
+      items: ["ceo_budgets", "ceo_settings", "ceo_broadcast", "ceo_accounts", "hr_analytics", "hr_onboarding", "hr_reviews", "hr_bulk"],
+    },
+    { title: "Operations", items: ["team", "students", "claims", "tasks", "templates", "social", "ai", "centres"] },
+    { title: "My workspace", items: ["mypanel", "myattendance", "myleave", "mysalary", "myrequests", "notifications"] },
+  ],
+  hr: [
+    { title: "Consoles", items: ["console_me"] },
+    {
+      title: "People operations",
+      items: [
+        "overview",
+        "approvals",
+        "hr_employees",
+        "hr_attendance",
+        "hr_leave",
+        "hr_tasks",
+        "hr_performance",
+        "hr_announcements",
+        "hr_reports",
+        "hr_analytics",
+        "hr_bulk",
+        "hr_onboarding",
+        "hr_reviews",
+      ],
+    },
+    { title: "Operations", items: ["team", "students", "claims", "tasks", "templates", "ai"] },
+    { title: "My workspace", items: ["mypanel", "myattendance", "myleave", "mysalary", "myrequests", "notifications"] },
+  ],
+  employee: [
+    { title: "My workspace", items: ["overview", "mypanel", "myattendance", "myleave", "mysalary", "myrequests", "notifications"] },
+    { title: "My work", items: ["approvals", "claims", "tasks", "templates", "ai"] },
+  ],
+};
+
+const tabLabelByScope: Partial<Record<"ceo" | "hr" | "employee", Partial<Record<Tab, string>>>> = {
+  ceo: { overview: "Executive Dashboard", team: "Accounts & Roles" },
+  hr: { overview: "HR Dashboard", team: "My Team" },
+};
+
+
+const PEOPLE_OPS_TABS: Partial<Record<Tab, PeopleOpsTab>> = {
+  hr_analytics: "analytics",
+  hr_bulk: "bulk",
+  hr_onboarding: "onboarding",
+  hr_reviews: "reviews",
+};
+
+const ORG_CONTROL_TABS: Partial<Record<Tab, OrgControlTab>> = {
+  ceo_analytics: "analytics",
+  ceo_budgets: "budgets",
+  ceo_settings: "settings",
+  ceo_accounts: "accounts",
+};
+
 function AdminDashboard() {
   const [tab, setTab] = useState<Tab>("overview");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [employmentTab, setEmploymentTab] = useState<"status" | "personal" | "documents">("status");
+  const [profileTab, setProfileTab] = useState<ProfileTab>("profile");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { user } = Route.useRouteContext();
-  const active = tabs.find((t) => t.id === tab)!;
+
+  const fetchAccess = useServerFn(getMyAccess);
+  const access = useQuery({ queryKey: ["my-access"], queryFn: () => fetchAccess({}) });
+  const scope = access.data?.scope ?? "employee";
+  const groups = navGroups[scope];
+  const labelFor = (t: { id: Tab; label: string }) =>
+    tabLabelByScope[scope]?.[t.id] ?? t.label;
+  const visibleTabs = groups
+    .flatMap((g) => g.items)
+    .map((id) => tabs.find((t) => t.id === id)!)
+    .filter(Boolean);
+  const activeBase = tabs.find((t) => t.id === tab);
+  const active = activeBase
+    ? { ...activeBase, label: labelFor(activeBase) }
+    : tab === "profile"
+      ? { id: "profile" as Tab, label: "My Profile", icon: UserIcon }
+      : tab === "settings"
+        ? { id: "settings" as Tab, label: "Settings", icon: Settings }
+        : { id: "employment" as Tab, label: "Employment Details", icon: BadgeCheck };
+
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -167,32 +361,39 @@ function AdminDashboard() {
             </Link>
           </div>
           <div className="px-5">
-            <p className="text-sm font-semibold text-accent">Working Menu</p>
+            <p className="text-sm font-semibold text-accent">
+              {scope === "ceo" ? "CEO Console" : scope === "hr" ? "HR Console" : "Working Menu"}
+            </p>
             <div className="mt-3 h-px bg-border" />
           </div>
-          <nav className="flex-1 space-y-1 p-3">
-            {tabs.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${tab === t.id
-                    ? "bg-secondary font-semibold text-primary"
-                    : "text-foreground/70 hover:bg-secondary/60 hover:text-foreground"
-                  }`}
-              >
-                <t.icon className={`h-4 w-4 ${tab === t.id ? "text-accent" : "text-accent/70"}`} />
-                {t.label}
-              </button>
+          <nav className="flex-1 space-y-4 p-3">
+            {groups.map((g) => (
+              <div key={g.title} className="space-y-1">
+                <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {g.title}
+                </p>
+                {g.items.map((id) => {
+                  const t = tabs.find((x) => x.id === id);
+                  if (!t) return null;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setTab(t.id)}
+                      className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
+                        tab === t.id
+                          ? "bg-secondary font-semibold text-primary"
+                          : "text-foreground/70 hover:bg-secondary/60 hover:text-foreground"
+                      }`}
+                    >
+                      <t.icon className={`h-4 w-4 ${tab === t.id ? "text-accent" : "text-accent/70"}`} />
+                      {labelFor(t)}
+                    </button>
+                  );
+                })}
+              </div>
             ))}
           </nav>
-          <div className="p-3">
-            <button
-              onClick={handleSignOut}
-              className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-secondary"
-            >
-              <LogOut className="h-4 w-4" /> Sign out
-            </button>
-          </div>
+
         </aside>
       )}
 
@@ -204,29 +405,84 @@ function AdminDashboard() {
             onChange={(e) => setTab(e.target.value as Tab)}
             className="min-w-0 max-w-[55vw] flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm md:hidden"
           >
-            {tabs.map((t) => (
+            {visibleTabs.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.label}
+                {labelFor(t)}
+
               </option>
             ))}
           </select>
           <div className="hidden md:block" />
-          <div className="flex min-w-0 items-center gap-2">
-            <div className="flex min-w-0 items-center gap-2 rounded-full border border-border bg-background px-2 py-1.5 pr-3 sm:pr-4">
+          <div className="relative flex min-w-0 items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setProfileOpen((v) => !v)}
+              aria-haspopup="menu"
+              aria-expanded={profileOpen}
+              className="flex min-w-0 items-center gap-2 rounded-full border border-border bg-background px-2 py-1.5 pr-3 transition-colors hover:bg-secondary sm:pr-4"
+            >
               <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold text-primary">
                 {(user?.email ?? "A").slice(0, 1).toUpperCase()}
               </span>
               <span className="max-w-[7rem] truncate text-sm font-medium sm:max-w-[12rem]">
                 {(user?.user_metadata?.["full_name"] as string) || user?.email || "Admin"}
               </span>
-            </div>
-            <button
-              onClick={handleSignOut}
-              aria-label="Sign out"
-              className="rounded-md border border-border p-2 text-muted-foreground transition-colors hover:bg-secondary md:hidden"
-            >
-              <LogOut className="h-4 w-4" />
             </button>
+
+            {profileOpen ? (
+              <>
+                <button
+                  aria-hidden
+                  tabIndex={-1}
+                  onClick={() => setProfileOpen(false)}
+                  className="fixed inset-0 z-30 cursor-default"
+                />
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full z-40 mt-2 w-56 overflow-hidden rounded-lg border border-border bg-card py-1 shadow-lift"
+                >
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setProfileTab("profile");
+                      setTab("profile");
+                      setProfileOpen(false);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-secondary"
+                  >
+                    <UserIcon className="h-4 w-4 text-muted-foreground" /> Profile
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setTab("settings");
+                      setProfileOpen(false);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-secondary"
+                  >
+                    <Settings className="h-4 w-4 text-muted-foreground" /> Settings
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setEmploymentTab("status");
+                      setTab("employment");
+                      setProfileOpen(false);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-secondary"
+                  >
+                    <BadgeCheck className="h-4 w-4 text-muted-foreground" /> Employment Details
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={handleSignOut}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-secondary"
+                  >
+                    <LogOut className="h-4 w-4 text-muted-foreground" /> Sign out
+                  </button>
+                </div>
+              </>
+            ) : null}
           </div>
         </header>
 
@@ -235,13 +491,44 @@ function AdminDashboard() {
         <div className="border-b border-border bg-card px-3 pb-3 sm:px-4 md:px-6">
           <h1 className="truncate text-base font-bold sm:text-lg">{active.label}</h1>
           <p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">
-            KaleidoNex / Admin / {active.label}
+            Kaleidonex / Admin / {active.label}
           </p>
         </div>
 
 
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-4 md:p-6">
-          {tab === "overview" && <OverviewSection onNavigate={setTab} />}
+          {tab === "overview" &&
+            (scope === "employee" ? (
+              <EmployeeHome onNavigate={(t) => setTab(t as Tab)} />
+            ) : scope === "hr" ? (
+              <HrDashboard />
+            ) : (
+              <ExecDashboard />
+            ))}
+
+          {tab === "console_exec" && scope === "ceo" ? <ExecDashboard /> : null}
+          {tab === "console_hr" && (scope === "ceo" || scope === "hr") ? <HrDashboard /> : null}
+          {tab === "console_me" ? <EmployeeHome onNavigate={(t) => setTab(t as Tab)} /> : null}
+
+          {tab.startsWith("exec_") && scope === "ceo" ? (
+            <ExecDashboard key={tab} initialTab={tab.replace("exec_", "") as ExecTab} />
+          ) : null}
+
+          {PEOPLE_OPS_TABS[tab as keyof typeof PEOPLE_OPS_TABS] && (scope === "hr" || scope === "ceo") ? (
+            <PeopleOpsSection key={tab} initialTab={PEOPLE_OPS_TABS[tab as keyof typeof PEOPLE_OPS_TABS]!} />
+          ) : null}
+
+          {tab === "ceo_broadcast" && scope === "ceo" ? <BroadcastSection /> : null}
+
+          {ORG_CONTROL_TABS[tab as keyof typeof ORG_CONTROL_TABS] && scope === "ceo" ? (
+            <OrgControlSection key={tab} initialTab={ORG_CONTROL_TABS[tab as keyof typeof ORG_CONTROL_TABS]!} />
+          ) : null}
+
+          {tab.startsWith("hr_") && !PEOPLE_OPS_TABS[tab as keyof typeof PEOPLE_OPS_TABS] && (scope === "hr" || scope === "ceo") ? (
+            <HrDashboard key={tab} initialTab={tab.replace("hr_", "") as HrTab} />
+          ) : null}
+
+          {tab === "approvals" && <ApprovalsSection isSuper={scope === "ceo"} />}
           {tab === "students" && <StudentsSection />}
           {tab === "claims" && <ExpenseClaimSection />}
           {tab === "mypanel" && <MyPanelSection />}
@@ -251,15 +538,27 @@ function AdminDashboard() {
           {tab === "templates" && <TemplatesSection />}
           {tab === "ai" && <AiSection />}
           {tab === "tasks" && <TaskBoardSection />}
+          {tab === "myrequests" && <MyRequestsSection />}
+          {tab === "notifications" && <NotificationsSection onNavigate={(t) => setTab(t as Tab)} />}
           {tab === "social" && <SocialMediaSection />}
           {tab === "centres" && <OurCentresSection />}
+          {tab === "team" && access.data ? <TeamSection access={access.data} /> : null}
+          {tab === "employment" && <EmploymentDetailsSection initialTab={employmentTab} />}
+          {tab === "settings" && <SettingsSection />}
+          {tab === "profile" && (
+            <MyProfileSection
+              initialTab={profileTab}
+              userEmail={user?.email}
+              userName={(user?.user_metadata?.["full_name"] as string) || undefined}
+            />
+          )}
         </main>
 
         <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-4 py-4 text-xs text-muted-foreground sm:px-6">
-          <span>Copyright © {new Date().getFullYear()} KaleidoNex</span>
+          <span>Copyright © {new Date().getFullYear()} Kaleidonex</span>
           <span className="flex gap-4">
-            <Link to="/curriculum">Curriculum</Link>
-            <Link to="/contact">Support</Link>
+            <Link to="/curriculum">Documentation</Link>
+            <Link to="/contact">FAQ</Link>
           </span>
         </footer>
       </div>
@@ -289,126 +588,64 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function OverviewSection({ onNavigate }: { onNavigate: (t: Tab) => void }) {
-  const fetchStats = useServerFn(getDashboardStats);
-  const { data, isLoading } = useQuery({
-    queryKey: ["dashboard-stats"],
-    queryFn: () => fetchStats(),
-  });
-
-  if (isLoading) return <Loading />;
-  if (!data) return <p className="text-sm text-muted-foreground">No data available.</p>;
-
-  const tiles: { label: string; icon: LucideIcon; badge?: number; tab: Tab }[] = [
-    { label: "Students", icon: GraduationCap, tab: "students" },
-    { label: "Expense Claim", icon: Receipt, tab: "claims" },
+  const tiles: { label: string; icon: LucideIcon; tab: Tab }[] = [
     { label: "My Panel", icon: UserCircle, tab: "mypanel" },
-    { label: "Templates", icon: LayoutTemplate, tab: "templates" },
+    { label: "My Attendance", icon: CalendarCheck, tab: "myattendance" },
+    { label: "My Leave", icon: Flag, tab: "myleave" },
+    { label: "My Salary", icon: CreditCard, tab: "mysalary" },
+    { label: "Expense Claim", icon: Receipt, tab: "claims" },
     { label: "My Task", icon: ListTodo, tab: "tasks" },
-    { label: "Ai", icon: Sparkles, tab: "ai" },
   ];
-
-
-  const bars = [
-    { label: "Leads", value: data.leads },
-    { label: "New leads", value: data.newLeads },
-    { label: "Products", value: data.products },
-    { label: "Schools", value: data.schools },
-    { label: "Teachers", value: data.teachers },
-  ];
-  const max = Math.max(1, ...bars.map((b) => b.value));
 
   return (
     <div className="space-y-5">
+      <div className="rounded-xl border border-border bg-gradient-to-r from-primary/10 via-card to-card p-5 shadow-soft">
+        <p className="text-[11px] uppercase tracking-wide text-accent">My workspace</p>
+        <h1 className="mt-1 text-xl font-bold sm:text-2xl">Welcome back</h1>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+          Check in, track your leave and salary, raise claims and work through your tasks.
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {tiles.map((t) => (
           <button
             key={t.label}
             onClick={() => onNavigate(t.tab)}
-            className="relative grid place-items-center gap-2 rounded-xl border border-border bg-card px-3 py-6 shadow-soft transition-shadow hover:shadow-lift"
+            className="grid place-items-center gap-2 rounded-xl border border-border bg-card px-3 py-6 shadow-soft transition-shadow hover:shadow-lift"
           >
-            {t.badge ? (
-              <span className="absolute -left-1 top-3 rounded-r bg-accent px-1.5 py-0.5 text-[10px] font-bold text-accent-foreground">
-                {t.badge}
-              </span>
-            ) : null}
             <t.icon className="h-6 w-6 text-ink" />
             <span className="text-sm text-muted-foreground">{t.label}</span>
           </button>
         ))}
       </div>
 
-      <Panel title="Platform report">
-        <p className="text-xs text-muted-foreground">Live totals across your KaleidoNex workspace.</p>
-        <div className="mt-6 flex h-56 items-end gap-6 border-b border-l border-border px-4 pb-0">
-          {bars.map((b) => (
-            <div key={b.label} className="flex flex-1 flex-col items-center justify-end gap-2">
-              <span className="text-xs font-semibold">{b.value}</span>
-              <div
-                className="w-full max-w-16 rounded-t bg-primary/80"
-                style={{ height: `${(b.value / max) * 170}px` }}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="mt-2 flex gap-6 px-4">
-          {bars.map((b) => (
-            <span key={b.label} className="flex-1 text-center text-[11px] text-muted-foreground">
-              {b.label}
-            </span>
-          ))}
-        </div>
-      </Panel>
-
       <div className="grid gap-5 lg:grid-cols-2">
-        <Panel title="Pipeline health">
-          <ul className="space-y-4 text-sm">
-            {[
-              { label: "New leads", value: data.newLeads, total: Math.max(1, data.leads) },
-              { label: "Active schools", value: data.activeSchools, total: Math.max(1, data.schools) },
-              { label: "Active teachers", value: data.activeTeachers, total: Math.max(1, data.teachers) },
-            ].map((row) => (
-              <li key={row.label}>
-                <div className="flex justify-between">
-                  <span>{row.label}</span>
-                  <span className="text-muted-foreground">
-                    {Math.round((row.value / row.total) * 100)}%
-                  </span>
-                </div>
-                <div className="mt-1.5 h-1.5 rounded-full bg-secondary">
-                  <div
-                    className="h-1.5 rounded-full bg-accent"
-                    style={{ width: `${Math.min(100, (row.value / row.total) * 100)}%` }}
-                  />
-                </div>
-              </li>
-            ))}
+        <Panel title="Getting things done">
+          <ul className="space-y-3 text-sm text-muted-foreground">
+            <li>• Mark attendance from My Attendance before starting your day.</li>
+            <li>• Leave and claim requests go to your reporting manager for approval.</li>
+            <li>• Keep your Employment Details complete for payroll accuracy.</li>
           </ul>
         </Panel>
-
-        <Panel title="Catalogue snapshot">
-          <dl className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <dt className="text-muted-foreground">Products</dt>
-              <dd className="text-2xl font-bold">{data.products}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">Schools</dt>
-              <dd className="text-2xl font-bold">{data.schools}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">Teachers</dt>
-              <dd className="text-2xl font-bold">{data.teachers}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">Total leads</dt>
-              <dd className="text-2xl font-bold">{data.leads}</dd>
-            </div>
-          </dl>
+        <Panel title="Shortcuts">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(["templates", "ai"] as Tab[]).map((id) => (
+              <button
+                key={id}
+                onClick={() => onNavigate(id)}
+                className="rounded-lg border border-border bg-background px-4 py-3 text-left text-sm font-medium transition-shadow hover:shadow-lift"
+              >
+                {id === "templates" ? "Templates library" : "AI Assistant"}
+              </button>
+            ))}
+          </div>
         </Panel>
       </div>
     </div>
   );
 }
+
 
 
 // ─── Leads ───────────────────────────────────────────────
@@ -627,8 +864,9 @@ function ProductsSection() {
                 <Td>{p.stock}</Td>
                 <Td>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${p.published ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
-                      }`}
+                    className={`rounded-full px-2 py-0.5 text-xs ${
+                      p.published ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
+                    }`}
                   >
                     {p.published ? "Published" : "Draft"}
                   </span>
@@ -836,8 +1074,9 @@ function ProgrammesSection() {
                 </Td>
                 <Td>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${p.published ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
-                      }`}
+                    className={`rounded-full px-2 py-0.5 text-xs ${
+                      p.published ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
+                    }`}
                   >
                     {p.published ? "Published" : "Draft"}
                   </span>
@@ -1060,12 +1299,13 @@ function SchoolsSection() {
                 <Td>{s.model}</Td>
                 <Td>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${s.status === "active"
+                    className={`rounded-full px-2 py-0.5 text-xs ${
+                      s.status === "active"
                         ? "bg-green-100 text-green-700"
                         : s.status === "prospect"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-secondary text-muted-foreground"
-                      }`}
+                    }`}
                   >
                     {s.status}
                   </span>
@@ -1274,8 +1514,9 @@ function TeachersSection() {
                 <Td>{t.schools?.name ?? "—"}</Td>
                 <Td>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${t.status === "active" ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
-                      }`}
+                    className={`rounded-full px-2 py-0.5 text-xs ${
+                      t.status === "active" ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"
+                    }`}
                   >
                     {t.status}
                   </span>
@@ -1462,15 +1703,17 @@ function UsersSection() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => toggleRole(u.id, "admin", !u.roles.includes("admin"))}
-                      className={`text-xs hover:underline ${u.roles.includes("admin") ? "text-destructive" : "text-primary"
-                        }`}
+                      className={`text-xs hover:underline ${
+                        u.roles.includes("admin") ? "text-destructive" : "text-primary"
+                      }`}
                     >
                       {u.roles.includes("admin") ? "Revoke admin" : "Make admin"}
                     </button>
                     <button
                       onClick={() => toggleRole(u.id, "editor", !u.roles.includes("editor"))}
-                      className={`text-xs hover:underline ${u.roles.includes("editor") ? "text-destructive" : "text-primary"
-                        }`}
+                      className={`text-xs hover:underline ${
+                        u.roles.includes("editor") ? "text-destructive" : "text-primary"
+                      }`}
                     >
                       {u.roles.includes("editor") ? "Revoke editor" : "Make editor"}
                     </button>

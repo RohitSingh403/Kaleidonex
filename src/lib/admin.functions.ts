@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireAdmin } from "@/lib/require-admin";
+import { requireSuperAdmin as requireAdmin } from "@/lib/require-admin";
 
 // ─── Leads ──────────────────────────────────────────────
 

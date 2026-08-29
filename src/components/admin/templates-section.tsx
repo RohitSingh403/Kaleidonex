@@ -394,7 +394,7 @@ function TemplateAccess({
           </div>
           <div className="text-right">
             <div className="text-[11px] text-muted-foreground">Organization</div>
-            <div className="font-bold">KaleidoNex</div>
+            <div className="font-bold">Kaleidonex</div>
           </div>
         </div>
       </Panel>
@@ -432,7 +432,7 @@ function TemplateAccess({
               </p>
               <p className="flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-muted-foreground" /> Organization:{" "}
-                <span className="text-primary">KaleidoNex</span>
+                <span className="text-primary">Kaleidonex</span>
               </p>
             </div>
           </div>

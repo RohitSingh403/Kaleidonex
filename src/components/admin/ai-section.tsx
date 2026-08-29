@@ -35,7 +35,7 @@ export function AiSection() {
             <Sparkles className="h-5 w-5 text-primary" />
           </span>
           <div>
-            <h2 className="text-xl font-bold">KaleidoNex AI</h2>
+            <h2 className="text-xl font-bold">Kaleidonex AI</h2>
             <p className="text-sm text-muted-foreground">
               Generate lesson plans, quizzes and project briefs for your classes in seconds.
             </p>

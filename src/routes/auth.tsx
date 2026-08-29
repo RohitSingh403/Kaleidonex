@@ -6,16 +6,17 @@ import { getSupabase, BACKEND_UNAVAILABLE } from "@/lib/supabase-optional";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Login — KaleidoNex CRM Portal" },
-      { name: "description", content: "Restricted sign in for KaleidoNex administrators." },
-      { property: "og:title", content: "Login — KaleidoNex CRM Portal" },
-      { property: "og:description", content: "Restricted sign in for KaleidoNex administrators." },
+      { title: "Login — Kaleidonex CRM Portal" },
+      { name: "description", content: "Restricted sign in for Kaleidonex administrators." },
+      { property: "og:title", content: "Login — Kaleidonex CRM Portal" },
+      { property: "og:description", content: "Restricted sign in for Kaleidonex administrators." },
     ],
   }),
   component: AuthPage,
 });
 
-const DENIED = "Access denied. This portal is restricted to administrators.";
+const DENIED = "Access denied. This portal is restricted to Kaleidonex staff accounts.";
+const STAFF_ROLES = ["admin", "ceo", "hr", "employee"];
 
 function requireClient() {
   const client = getSupabase();
@@ -33,17 +34,19 @@ function AuthPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function ensureAdminOrDeny() {
+  async function ensureStaffOrDeny() {
     const supabase = requireClient();
     const { data: userData } = await supabase.auth.getUser();
     const userId = userData.user?.id;
     if (!userId) throw new Error(DENIED);
 
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
-    if (!isAdmin) {
+    const { data: roleRows } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+
+    const roles = (roleRows ?? []).map((r) => r.role as string);
+    if (!roles.some((r) => STAFF_ROLES.includes(r))) {
       await supabase.auth.signOut();
       throw new Error(DENIED);
     }
@@ -59,8 +62,8 @@ function AuthPage() {
       const supabase = requireClient();
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) throw signInError;
-      await ensureAdminOrDeny();
-      if (!remember) sessionStorage.setItem("KaleidoNex.session-only", "1");
+      await ensureStaffOrDeny();
+      if (!remember) sessionStorage.setItem("kaleidonex.session-only", "1");
       navigate({ to: "/admin", replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");

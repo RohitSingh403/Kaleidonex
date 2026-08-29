@@ -4,11 +4,11 @@ import { Card, CtaBand, PageHero, Section, SectionHeading } from "@/components/u
 export const Route = createFileRoute("/teachers")({
   head: () => ({
     meta: [
-      { title: "For Teachers — Training, Certification & Lesson Support | KaleidoNex" },
+      { title: "For Teachers — Training, Certification & Lesson Support | Kaleidonex" },
       {
         name: "description",
         content:
-          "KaleidoNex trains and certifies school teachers to run coding, robotics and AI classes with ready lesson plans, kits and ongoing mentoring.",
+          "Kaleidonex trains and certifies school teachers to run coding, robotics and AI classes with ready lesson plans, kits and ongoing mentoring.",
       },
       { property: "og:title", content: "Teacher Training & Certification" },
       {

@@ -365,9 +365,9 @@ function AdminDashboard() {
         />
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col h-screen overflow-y-auto">
+      <div className="flex min-w-0 flex-1 flex-col h-screen overflow-hidden">
         {/* Top bar */}
-        <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card/95 backdrop-blur px-3 py-3 sm:px-4 shrink-0">
+        <header className="z-10 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-4 py-3 sm:px-6 shrink-0">
           <select
             value={tab}
             onChange={(e) => setTab(e.target.value as Tab)}

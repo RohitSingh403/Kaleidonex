@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CalendarDays, CheckCircle2, XCircle, Download, Eye, RefreshCw, Mail, Lock, CalendarRange } from "lucide-react";
@@ -30,7 +30,8 @@ export type AttendanceRow = {
   status: AttendanceStatus;
   check_in: string | null;
   check_out: string | null;
-  daily_update: string;
+  daily_update: string | null;
+  notes?: string | null;
 };
 
 export type LeaveRow = {
@@ -41,28 +42,28 @@ export type LeaveRow = {
   days: number;
   reason: string;
   status: "pending" | "approved" | "rejected";
+  created_at?: string;
 };
 
 export type SalaryRow = {
   id: string;
-  period_month: number;
-  period_year: number;
-  days: number;
-  basic_salary: number;
-  earnings: number;
+  pay_period: string;
+  base_salary: number;
+  allowances: number;
   deductions: number;
-  net_pay: number;
+  net_salary: number;
   status: "pending" | "paid";
-  paid_on: string | null;
+  payment_date?: string | null;
 };
 
 export type RequestRow = {
   id: string;
   request_type: string;
-  details: string;
-  note: string;
+  subject: string;
+  description: string;
   status: "pending" | "approved" | "rejected";
-  created_at: string;
+  created_at?: string;
+  admin_notes?: string | null;
 };
 
 const inr = (n: number) => `₹${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -82,11 +83,19 @@ const statusLabels: Record<AttendanceStatus, string> = {
   present: "Present",
   absent: "Absent",
   half_day: "Half Day",
-  leave: "Leave",
+  leave: "On Leave",
   paid_leave: "Paid Leave",
   holiday: "Holiday",
 };
-const statusDot: Record<AttendanceStatus, string> = {
+const statusBadgeColors: Record<AttendanceStatus, string> = {
+  present: "bg-emerald-500/15 text-emerald-700",
+  absent: "bg-destructive/10 text-destructive",
+  half_day: "bg-amber-500/15 text-amber-700",
+  leave: "bg-sky-500/15 text-sky-700",
+  paid_leave: "bg-teal-500/15 text-teal-700",
+  holiday: "bg-violet-500/15 text-violet-700",
+};
+const statusDotColors: Record<AttendanceStatus, string> = {
   present: "bg-emerald-500",
   absent: "bg-destructive",
   half_day: "bg-amber-500",
@@ -135,31 +144,23 @@ function AttendanceWorkspace() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-1">
-        <div>
-          <h1 className="text-lg font-semibold">Attendance</h1>
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            <span className="text-accent">Kaleidonex</span> / Attendance
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          {([
-            { id: "mark", label: "Mark Attendance" },
-            { id: "monthly", label: "Monthly Attendance" },
-          ] as const).map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setView(t.id)}
-              className={`-mb-px border-b-2 px-1 py-2 text-sm transition-colors ${
-                view === t.id
-                  ? "border-primary font-semibold text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+      <div className="flex items-center gap-2 border-b border-border pb-2">
+        {([
+          { id: "mark", label: "Mark Attendance" },
+          { id: "monthly", label: "Monthly Attendance Report" },
+        ] as const).map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setView(t.id)}
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              view === t.id
+                ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {view === "mark" ? (
@@ -235,7 +236,7 @@ function EmployeeDashboard({ go }: { go: (t: SubTab) => void }) {
   const fetchSalary = useServerFn(getSalaryRecords);
   const fetchRequests = useServerFn(getEmployeeRequests);
 
-  const attendance = (useQuery({ queryKey: ["emp-attendance"], queryFn: () => fetchAttendance() }).data ?? []) as AttendanceRow[];
+  const attendance = (useQuery({ queryKey: ["attendance"], queryFn: () => fetchAttendance() }).data ?? []) as AttendanceRow[];
   const leaves = (useQuery({ queryKey: ["emp-leaves"], queryFn: () => fetchLeaves() }).data ?? []) as LeaveRow[];
   const salary = (useQuery({ queryKey: ["emp-salary"], queryFn: () => fetchSalary() }).data ?? []) as SalaryRow[];
   const requests = (useQuery({ queryKey: ["emp-requests"], queryFn: () => fetchRequests() }).data ?? []) as RequestRow[];
@@ -423,7 +424,7 @@ function MarkAttendance({ onDone, onViewMonthly }: { onDone: () => void; onViewM
   const queryClient = useQueryClient();
   const fetchAttendance = useServerFn(getAttendance);
   const save = useServerFn(markAttendance);
-  const { data } = useQuery({ queryKey: ["emp-attendance"], queryFn: () => fetchAttendance() });
+  const { data } = useQuery({ queryKey: ["attendance"], queryFn: () => fetchAttendance() });
   const rows = (data ?? []) as AttendanceRow[];
 
   const today = new Date();
@@ -437,32 +438,45 @@ function MarkAttendance({ onDone, onViewMonthly }: { onDone: () => void; onViewM
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // Sync existing database record if available
+  useEffect(() => {
+    if (existing) {
+      if (existing.status) setStatus(existing.status);
+      if (existing.check_in) setCheckIn(existing.check_in.slice(0, 5));
+      if (existing.check_out) setCheckOut(existing.check_out.slice(0, 5));
+      if (existing.daily_update) setUpdate(existing.daily_update);
+    }
+  }, [existing]);
+
   const hours = useMemo(() => {
-    if (!checkIn || !checkOut) return 0;
-    const [ih, im] = checkIn.split(":").map(Number);
-    const [oh, om] = checkOut.split(":").map(Number);
+    const cin = checkIn || (existing?.check_in ? existing.check_in.slice(0, 5) : "");
+    const cout = checkOut || (existing?.check_out ? existing.check_out.slice(0, 5) : "");
+    if (!cin || !cout) return 0;
+    const [ih, im] = cin.split(":").map(Number);
+    const [oh, om] = cout.split(":").map(Number);
     const mins = (oh! * 60 + om!) - (ih! * 60 + im!);
     return mins > 0 ? Math.round((mins / 60) * 10) / 10 : 0;
-  }, [checkIn, checkOut]);
+  }, [checkIn, checkOut, existing]);
 
   async function submit() {
-    if (!update.trim()) {
-      setError("Daily update is mandatory.");
-      return;
-    }
     setError("");
     setSaving(true);
+    const nowTime = new Date().toTimeString().slice(0, 8);
+    const finalCheckIn = checkIn ? (checkIn.length === 5 ? `${checkIn}:00` : checkIn) : (existing?.check_in ?? nowTime);
+    const finalCheckOut = checkOut ? (checkOut.length === 5 ? `${checkOut}:00` : checkOut) : (existing?.check_out ?? null);
+
     try {
       await save({
         data: {
           work_date: iso,
           status,
-          check_in: checkIn || null,
-          check_out: checkOut || null,
+          check_in: finalCheckIn,
+          check_out: finalCheckOut,
           daily_update: update.trim(),
         },
       });
-      await queryClient.invalidateQueries({ queryKey: ["emp-attendance"] });
+      await queryClient.invalidateQueries({ queryKey: ["attendance"] });
+      await queryClient.invalidateQueries({ queryKey: ["workforce-snapshot"] });
       onDone();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save attendance.");
@@ -517,8 +531,9 @@ function MarkAttendance({ onDone, onViewMonthly }: { onDone: () => void; onViewM
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
               <button
+                type="button"
                 onClick={() => setCheckIn(new Date().toTimeString().slice(0, 5))}
-                className="shrink-0 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white"
+                className="shrink-0 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
               >
                 Check In
               </button>
@@ -534,15 +549,15 @@ function MarkAttendance({ onDone, onViewMonthly }: { onDone: () => void; onViewM
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
               <button
+                type="button"
                 onClick={() => setCheckOut(new Date().toTimeString().slice(0, 5))}
-                className="shrink-0 rounded-md bg-destructive px-3 py-2 text-xs font-semibold text-destructive-foreground"
+                className="shrink-0 rounded-md bg-destructive px-3 py-2 text-xs font-semibold text-destructive-foreground hover:bg-destructive/90"
               >
                 Check Out
               </button>
             </div>
           </div>
         </div>
-
 
         <div className="mt-4">
           <label className="text-sm font-medium">Daily Update (Mandatory)</label>
@@ -560,6 +575,7 @@ function MarkAttendance({ onDone, onViewMonthly }: { onDone: () => void; onViewM
 
         <div className="mt-4 flex justify-end gap-2">
           <button
+            type="button"
             onClick={() => {
               setCheckIn("");
               setCheckOut("");
@@ -572,6 +588,7 @@ function MarkAttendance({ onDone, onViewMonthly }: { onDone: () => void; onViewM
             Reset Form
           </button>
           <button
+            type="button"
             onClick={submit}
             disabled={saving}
             className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-ink-foreground disabled:opacity-60"
@@ -585,6 +602,14 @@ function MarkAttendance({ onDone, onViewMonthly }: { onDone: () => void; onViewM
         <div className="flex items-center justify-between border-b border-border py-2 text-sm">
           <span className="text-muted-foreground">Status</span>
           <span className="font-semibold text-emerald-600">{statusLabels[existing?.status ?? status]}</span>
+        </div>
+        <div className="flex items-center justify-between py-2 text-sm">
+          <span className="text-muted-foreground">Check-in</span>
+          <span className="font-semibold text-foreground">{existing?.check_in ? existing.check_in.slice(0, 5) : (checkIn || "—")}</span>
+        </div>
+        <div className="flex items-center justify-between py-2 text-sm">
+          <span className="text-muted-foreground">Check-out</span>
+          <span className="font-semibold text-foreground">{existing?.check_out ? existing.check_out.slice(0, 5) : (checkOut || "—")}</span>
         </div>
         <div className="flex items-center justify-between py-2 text-sm">
           <span className="text-muted-foreground">Total Hours</span>
@@ -610,7 +635,7 @@ function workHours(r: AttendanceRow) {
 
 function MonthlyAttendance() {
   const fetchAttendance = useServerFn(getAttendance);
-  const { data } = useQuery({ queryKey: ["emp-attendance"], queryFn: () => fetchAttendance() });
+  const { data } = useQuery({ queryKey: ["attendance"], queryFn: () => fetchAttendance() });
   const rows = (data ?? []) as AttendanceRow[];
 
   const now = new Date();

@@ -136,6 +136,10 @@ export function Employee360({
             <Row label="Employee code" value={d.profile?.employee_code} />
             <Row label="Department" value={d.profile?.department} />
             <Row label="Designation" value={d.profile?.designation} />
+            <Row
+              label="Monthly Base Salary"
+              value={d.profile?.salary ? `₹${Number(d.profile.salary).toLocaleString("en-IN")}` : "₹0"}
+            />
             <Row label="Reporting to" value={d.profile?.manager_name} />
             <Row label="Joining date" value={d.profile?.joining_date} />
             <Row label="Status" value={d.profile?.status} />
@@ -164,6 +168,10 @@ export function Employee360({
       {tab === "employment" && d ? (
         <div className="rounded-lg border border-border bg-card p-4">
           <Row label="Employment type" value={d.profile?.employment_type} />
+          <Row
+            label="Monthly Base Salary"
+            value={d.profile?.salary ? `₹${Number(d.profile.salary).toLocaleString("en-IN")}` : "₹0"}
+          />
           <Row label="Work mode" value={d.profile?.work_mode} />
           <Row label="Work location" value={d.profile?.work_location} />
           <Row label="Organisation" value={d.profile?.working_organisation} />

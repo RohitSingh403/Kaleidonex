@@ -21,7 +21,17 @@ export const Route = createFileRoute("/_authenticated")({
       throw redirect({ to: "/auth" });
     }
 
-    return { user: data.user };
+    const isSuper = roles.some((r) => r === "admin" || r === "ceo");
+    const isHr = roles.includes("hr");
+    const scope: "ceo" | "hr" | "employee" = isSuper ? "ceo" : isHr ? "hr" : "employee";
+
+    return {
+      user: data.user,
+      roles,
+      isSuper,
+      isHr,
+      scope,
+    };
   },
   component: () => <Outlet />,
 });

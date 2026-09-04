@@ -15,6 +15,7 @@ export type TeamMember = {
   manager_id: string | null;
   manager_name: string;
   roles: string[];
+  base_salary: number;
 };
 
 export type MyAccess = {
@@ -44,7 +45,7 @@ export const getTeamMembers = createServerFn({ method: "GET" })
       context.supabase
         .from("employee_profile")
         .select(
-          "user_id, full_name, designation, department, status, manager_id, manager_name",
+          "user_id, full_name, designation, department, status, manager_id, manager_name, salary",
         ),
       context.supabase.from("user_roles").select("user_id, role"),
     ]);
@@ -90,6 +91,7 @@ export const getTeamMembers = createServerFn({ method: "GET" })
           (e["manager_name"] as string) ||
           (managerId ? (nameById.get(managerId) ?? "") : ""),
         roles: roleMap.get(id) ?? [],
+        base_salary: Number(e["salary"] || 0),
       };
     });
   });
@@ -103,7 +105,8 @@ export const getManagers = createServerFn({ method: "GET" })
       .select("user_id, role")
       .in("role", ["hr", "ceo", "admin"]);
     const { data: profiles } = await context.supabase.from("profiles").select("id, full_name");
-    const nameById = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
+    const nameById = new Map<string, string>();
+    for (const p of profiles ?? []) nameById.set(p.id, p.full_name);
     const seen = new Set<string>();
     const out: { id: string; name: string; role: string }[] = [];
     for (const r of roles ?? []) {
@@ -125,6 +128,7 @@ export const createStaffAccount = createServerFn({ method: "POST" })
       designation: string;
       department: string;
       manager_id: string | null;
+      base_salary?: number;
     }) => input,
   )
   .handler(async ({ data, context }) => {
@@ -155,7 +159,10 @@ export const createStaffAccount = createServerFn({ method: "POST" })
 
     const { error: roleErr } = await supabaseAdmin
       .from("user_roles")
-      .insert({ user_id: newId, role: data.role });
+      .insert({
+        user_id: newId,
+        role: data.role,
+      });
     if (roleErr && roleErr.code !== "23505") throw new Error(roleErr.message);
 
     let managerName = "";
@@ -168,7 +175,7 @@ export const createStaffAccount = createServerFn({ method: "POST" })
       managerName = mp?.full_name ?? "";
     }
 
-    const { error: profErr } = await supabaseAdmin.from("employee_profile").upsert(
+    const { error: profErr } = await (supabaseAdmin as any).from("employee_profile").upsert(
       {
         user_id: newId,
         full_name: data.full_name,
@@ -176,6 +183,7 @@ export const createStaffAccount = createServerFn({ method: "POST" })
         department: data.department,
         manager_id: managerId,
         manager_name: managerName,
+        salary: Number(data.base_salary) > 0 ? Number(data.base_salary) : 0,
       },
       { onConflict: "user_id" },
     );

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,12 +63,21 @@ import { OrgControlSection, type OrgControlTab } from "@/components/admin/org-co
 import { BroadcastSection } from "@/components/admin/broadcast-section";
 import { MyRequestsSection } from "@/components/admin/my-requests-section";
 import { NotificationsSection } from "@/components/admin/notifications-section";
+import { PayrollSection } from "@/components/admin/payroll-section";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
+export type AdminSearch = {
+  tab?: string | undefined;
+};
+
 export const Route = createFileRoute("/_authenticated/admin")({
+  validateSearch: (search: Record<string, unknown>): AdminSearch => {
+    const rawTab = search["tab"];
+    return typeof rawTab === "string" ? { tab: rawTab } : {};
+  },
   head: () => ({
     meta: [
-      { title: "Admin Dashboard — Kaleidonex" },
+      { title: "Workspace & Management — Kaleidonex" },
       { name: "description", content: "Manage workforce, attendance, leave, tasks, and system settings." },
     ],
   }),
@@ -89,6 +98,7 @@ type Tab =
   | "exec_reports"
   | "exec_audit"
   | "approvals"
+  | "payroll"
   | "hr_employees"
   | "hr_attendance"
   | "hr_leave"
@@ -137,6 +147,7 @@ const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: "exec_reports", label: "Reports & Analytics", icon: BarChart3 },
   { id: "exec_audit", label: "Audit Logs", icon: ScrollText },
   { id: "approvals", label: "Approvals", icon: ShieldCheck },
+  { id: "payroll", label: "Payroll & Salaries", icon: CreditCard },
   { id: "hr_employees", label: "Employees", icon: Users },
   { id: "hr_attendance", label: "Attendance", icon: CalendarCheck },
   { id: "hr_leave", label: "Leave Management", icon: Flag },
@@ -183,7 +194,7 @@ const navGroups: Record<"ceo" | "hr" | "employee", NavGroup[]> = {
     },
     {
       title: "Finance & Operations",
-      items: ["ceo_budgets", "ceo_broadcast", "ceo_settings"],
+      items: ["payroll", "ceo_budgets", "ceo_broadcast", "ceo_settings"],
     },
     {
       title: "Academy & Centers",
@@ -201,7 +212,7 @@ const navGroups: Record<"ceo" | "hr" | "employee", NavGroup[]> = {
     },
     {
       title: "Attendance & Leaves",
-      items: ["approvals", "hr_attendance", "hr_bulk", "hr_leave"],
+      items: ["approvals", "payroll", "hr_attendance", "hr_bulk", "hr_leave"],
     },
     {
       title: "Talent & Reports",
@@ -238,6 +249,7 @@ const tabLabelByScope: Partial<Record<"ceo" | "hr" | "employee", Partial<Record<
     exec_attendance: "Attendance Governance",
     exec_performance: "Performance Reviews",
     exec_audit: "Audit Trail",
+    payroll: "Employee Payroll & Salary",
     ceo_budgets: "Budgets & Cost Centres",
     ceo_broadcast: "Company Broadcasts",
     ceo_settings: "Global Settings",
@@ -248,6 +260,7 @@ const tabLabelByScope: Partial<Record<"ceo" | "hr" | "employee", Partial<Record<
     hr_employees: "Staff Directory",
     hr_onboarding: "Staff Onboarding",
     hr_reviews: "Reviews & 1:1",
+    payroll: "Payroll & Salary Computation",
     hr_attendance: "Daily Attendance",
     hr_bulk: "Bulk Attendance",
     hr_leave: "Leave Management",
@@ -282,21 +295,64 @@ const ORG_CONTROL_TABS: Partial<Record<Tab, OrgControlTab>> = {
   ceo_accounts: "accounts",
 };
 
+const portalNameByScope: Record<"ceo" | "hr" | "employee", string> = {
+  ceo: "Executive Suite",
+  hr: "HR Operations",
+  employee: "Employee Portal",
+};
+
 function AdminDashboard() {
-  const [tab, setTab] = useState<Tab>("overview");
+  const search = Route.useSearch();
+  const routeContext = Route.useRouteContext();
+  const user = routeContext.user;
+  const routeScope = (routeContext as { scope?: "ceo" | "hr" | "employee" }).scope ?? "employee";
+  const routeRoles = (routeContext as { roles?: string[] }).roles ?? [];
+  const routeIsSuper = (routeContext as { isSuper?: boolean }).isSuper ?? false;
+  const routeIsHr = (routeContext as { isHr?: boolean }).isHr ?? false;
+
+  const initialTab = (search.tab as Tab) || "overview";
+  const [tab, setTabState] = useState<Tab>(initialTab);
   const [profileOpen, setProfileOpen] = useState(false);
   const [employmentTab, setEmploymentTab] = useState<"status" | "personal" | "documents">("status");
   const [profileTab, setProfileTab] = useState<ProfileTab>("profile");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { user } = Route.useRouteContext();
 
   const fetchAccess = useServerFn(getMyAccess);
-  const access = useQuery({ queryKey: ["my-access"], queryFn: () => fetchAccess({}) });
-  const scope = access.data?.scope ?? "employee";
+  const access = useQuery({
+    queryKey: ["my-access"],
+    queryFn: () => fetchAccess({}),
+    initialData: {
+      userId: user?.id ?? "",
+      roles: routeRoles,
+      isSuper: routeIsSuper,
+      isHr: routeIsHr,
+      scope: routeScope,
+    },
+    staleTime: 60_000,
+  });
+
+  const scope = access.data?.scope ?? routeScope ?? "employee";
   const groups = navGroups[scope];
   const labelFor = (t: { id: string; label: string }) =>
     tabLabelByScope[scope]?.[t.id as Tab] ?? t.label;
+
+  useEffect(() => {
+    const urlTab = (search.tab as Tab) || "overview";
+    if (urlTab !== tab) {
+      setTabState(urlTab);
+    }
+  }, [search.tab]);
+
+  function setTab(newTab: Tab) {
+    setTabState(newTab);
+    const searchParams: AdminSearch = newTab === "overview" ? {} : { tab: newTab };
+    navigate({
+      to: "/admin",
+      search: searchParams,
+      replace: true,
+    });
+  }
   const visibleTabs = groups
     .flatMap((g) => g.items)
     .map((id) => tabs.find((t) => t.id === id)!)
@@ -314,7 +370,7 @@ function AdminDashboard() {
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate({ to: "/", replace: true });
   }
 
   return (
@@ -418,10 +474,18 @@ function AdminDashboard() {
 
         {/* Breadcrumb strip */}
         <div className="border-b border-border bg-card px-3 pb-3 sm:px-4 md:px-6">
-          <h1 className="truncate text-base font-bold sm:text-lg">{active.label}</h1>
-          <p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">
-            Kaleidonex / Admin / {active.label}
-          </p>
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h1 className="truncate text-base font-bold sm:text-lg">{active.label}</h1>
+              <p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">
+                Kaleidonex / {portalNameByScope[scope]} / {active.label}
+              </p>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 rounded-full border border-border bg-secondary/50 px-3 py-1 text-xs font-medium text-foreground">
+              <span className={`h-2 w-2 rounded-full ${scope === "ceo" ? "bg-amber-500" : scope === "hr" ? "bg-blue-500" : "bg-emerald-500"}`} />
+              <span>{scope === "ceo" ? "CEO Executive Suite" : scope === "hr" ? "HR Management Portal" : "Employee Portal"}</span>
+            </div>
+          </div>
         </div>
 
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-4 md:p-6">
@@ -457,6 +521,7 @@ function AdminDashboard() {
           ) : null}
 
           {tab === "approvals" && <ApprovalsSection isSuper={scope === "ceo"} />}
+          {tab === "payroll" && (scope === "ceo" || scope === "hr") ? <PayrollSection /> : null}
           {tab === "students" && <StudentsSection />}
           {tab === "claims" && <ExpenseClaimSection />}
           {tab === "mypanel" && <MyPanelSection />}

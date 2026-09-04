@@ -11,6 +11,12 @@ import {
   Network,
   ScrollText,
   UserCog,
+  MoreHorizontal,
+  Eye,
+  Edit2,
+  UserCheck,
+  UserX,
+  X,
 } from "lucide-react";
 import {
   getWorkforceSnapshot,
@@ -20,6 +26,7 @@ import {
   getAuditLogs,
   setEmployeeStatus,
   updateEmployeeAssignment,
+  type WorkforceRow,
 } from "@/lib/workforce.functions";
 import { getPendingApprovals, decideApproval, assignManager, type TeamMember } from "@/lib/team.functions";
 import { downloadCsv, pct } from "@/lib/workforce.constants";
@@ -35,6 +42,13 @@ import {
   btnPrimary,
   btnGhost,
 } from "@/components/admin/workforce-ui";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 import { Employee360 } from "@/components/admin/employee-360";
 
 export type ExecTab =
@@ -107,6 +121,38 @@ export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: 
     });
   }, [audit.data, auditQuery, auditAction, auditFrom, auditTo]);
 
+
+  const [editingEmployee, setEditingEmployee] = useState<WorkforceRow | null>(null);
+  const [editForm, setEditForm] = useState<{ department: string; designation: string; salary: string }>({
+    department: "",
+    designation: "",
+    salary: "",
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingEmployee) return;
+    setSavingEdit(true);
+    try {
+      await setAssignment({
+        data: {
+          user_id: editingEmployee.user_id,
+          department: editForm.department.trim(),
+          designation: editForm.designation.trim(),
+          department_id: null,
+          salary: editForm.salary ? Number(editForm.salary) : 0,
+        },
+      });
+      await qc.invalidateQueries({ queryKey: ["workforce-snapshot"] });
+      toast.success(`Updated details for ${editingEmployee.full_name}`);
+      setEditingEmployee(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update employee");
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   const rows = snap.data?.rows ?? [];
   const kpi = snap.data?.kpi;
@@ -302,20 +348,24 @@ export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: 
           }
         >
           <DataTable
-            headers={["Employee", "Department", "Designation", "Reports to", "Status", "Attendance", "Completion", "Actions"]}
+            headers={["Employee", "Department", "Designation", "Base Salary", "Reports to", "Status", "Attendance", "Completion", "Actions"]}
             isEmpty={drilled.length === 0}
           >
             {drilled.map((r) => (
-              <tr key={r.user_id}>
-                <td className="py-2 pr-4 font-medium">{r.full_name}</td>
-                <td className="py-2 pr-4">{r.department || "—"}</td>
-                <td className="py-2 pr-4">{r.designation || "—"}</td>
-                <td className="py-2 pr-4">
+              <tr key={r.user_id} className="hover:bg-muted/30 transition-colors">
+                <td className="py-2.5 pr-4 font-medium whitespace-nowrap">{r.full_name}</td>
+                <td className="py-2.5 pr-4 text-muted-foreground whitespace-nowrap">{r.department || "—"}</td>
+                <td className="py-2.5 pr-4 text-muted-foreground whitespace-nowrap">{r.designation || "—"}</td>
+                <td className="py-2.5 pr-4 font-semibold text-foreground whitespace-nowrap">
+                  ₹{Number(r.salary || 0).toLocaleString("en-IN")}
+                </td>
+                <td className="py-2.5 pr-4 whitespace-nowrap">
                   <select
                     value={r.manager_id ?? ""}
                     onChange={async (e) => {
                       await setManager({ data: { user_id: r.user_id, manager_id: e.target.value || null } });
                       await qc.invalidateQueries({ queryKey: ["workforce-snapshot"] });
+                      toast.success("Reporting manager updated");
                     }}
                     className="rounded border border-border bg-background px-2 py-1 text-xs"
                   >
@@ -327,41 +377,68 @@ export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: 
                     ))}
                   </select>
                 </td>
-                <td className="py-2 pr-4">
+                <td className="py-2.5 pr-4 whitespace-nowrap">
                   <StatusPill value={r.status} />
                 </td>
-                <td className="py-2 pr-4">{r.attendancePct}%</td>
-                <td className="py-2 pr-4">{r.completionPct}%</td>
-                <td className="py-2 pr-4">
-                  <div className="flex flex-wrap gap-1">
-                    <button className={btnGhost} onClick={() => setOpen({ id: r.user_id, name: r.full_name })}>
-                      View
-                    </button>
-                    <button
-                      className={btnGhost}
-                      onClick={async () => {
-                        await setStatus({
-                          data: { user_id: r.user_id, status: r.status === "inactive" ? "active" : "inactive" },
-                        });
-                        await qc.invalidateQueries({ queryKey: ["workforce-snapshot"] });
-                      }}
-                    >
-                      {r.status === "inactive" ? "Activate" : "Deactivate"}
-                    </button>
-                    <button
-                      className={btnGhost}
-                      onClick={async () => {
-                        const department = window.prompt("Department", r.department) ?? r.department;
-                        const designation = window.prompt("Designation", r.designation) ?? r.designation;
-                        await setAssignment({
-                          data: { user_id: r.user_id, department, designation, department_id: null },
-                        });
-                        await qc.invalidateQueries({ queryKey: ["workforce-snapshot"] });
-                      }}
-                    >
-                      Edit
-                    </button>
-                  </div>
+                <td className="py-2.5 pr-4 whitespace-nowrap">{r.attendancePct}%</td>
+                <td className="py-2.5 pr-4 whitespace-nowrap">{r.completionPct}%</td>
+                <td className="py-2.5 pr-4 whitespace-nowrap">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Actions</span>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-52 bg-card border border-border shadow-md rounded-lg p-1 z-50">
+                      <DropdownMenuItem
+                        onClick={() => setOpen({ id: r.user_id, name: r.full_name })}
+                        className="flex items-center gap-2 px-3 py-2 text-xs rounded cursor-pointer hover:bg-secondary transition-colors"
+                      >
+                        <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span>View 360 Profile</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setEditingEmployee(r);
+                          setEditForm({
+                            department: r.department || "",
+                            designation: r.designation || "",
+                            salary: String(r.salary || 0),
+                          });
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 text-xs rounded cursor-pointer hover:bg-secondary transition-colors"
+                      >
+                        <Edit2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span>Edit Details & Salary</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={async () => {
+                          const nextStatus = r.status === "inactive" ? "active" : "inactive";
+                          await setStatus({
+                            data: { user_id: r.user_id, status: nextStatus },
+                          });
+                          await qc.invalidateQueries({ queryKey: ["workforce-snapshot"] });
+                          toast.success(`Employee marked as ${nextStatus}`);
+                        }}
+                        className={`flex items-center gap-2 px-3 py-2 text-xs rounded cursor-pointer hover:bg-secondary transition-colors ${
+                          r.status === "inactive" ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+                        }`}
+                      >
+                        {r.status === "inactive" ? (
+                          <>
+                            <UserCheck className="h-3.5 w-3.5" />
+                            <span>Activate Employee</span>
+                          </>
+                        ) : (
+                          <>
+                            <UserX className="h-3.5 w-3.5" />
+                            <span>Deactivate Employee</span>
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </td>
               </tr>
             ))}
@@ -770,6 +847,78 @@ export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: 
 
 
       {open ? <Employee360 userId={open.id} name={open.name} canReview onClose={() => setOpen(null)} /> : null}
+
+      {editingEmployee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div>
+                <h3 className="font-semibold text-lg text-foreground">Edit Employee & Salary</h3>
+                <p className="text-xs text-muted-foreground">{editingEmployee.full_name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingEmployee(null)}
+                className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="mt-4 space-y-4">
+              <Field label="Department">
+                <input
+                  value={editForm.department}
+                  onChange={(e) => setEditForm((f) => ({ ...f, department: e.target.value }))}
+                  placeholder="e.g. 2D Animation, Tech"
+                  className={inputClass}
+                />
+              </Field>
+
+              <Field label="Designation">
+                <input
+                  value={editForm.designation}
+                  onChange={(e) => setEditForm((f) => ({ ...f, designation: e.target.value }))}
+                  placeholder="e.g. Senior Animator"
+                  className={inputClass}
+                />
+              </Field>
+
+              <Field label="Monthly Base Salary (₹ INR)">
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-sm text-muted-foreground">₹</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={editForm.salary}
+                    onChange={(e) => setEditForm((f) => ({ ...f, salary: e.target.value }))}
+                    placeholder="e.g. 50000"
+                    className={`${inputClass} pl-7`}
+                  />
+                </div>
+              </Field>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setEditingEmployee(null)}
+                  className={btnGhost}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit}
+                  className={btnPrimary}
+                >
+                  {savingEdit ? "Saving…" : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

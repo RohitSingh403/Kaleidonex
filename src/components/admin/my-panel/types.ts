@@ -42,6 +42,7 @@ export type SalaryRow = {
   earnings: number;
   deductions: number;
   net_pay: number;
+  net_salary?: number;
   status: "pending" | "paid";
   paid_on?: string | null;
 };

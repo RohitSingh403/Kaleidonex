@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Users, ShieldCheck, UserPlus, CheckCircle2, XCircle, IndianRupee, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Users, ShieldCheck, UserPlus, CheckCircle2, XCircle, IndianRupee, Trash2, Edit2 } from "lucide-react";
 import { deleteStaffAccount } from "@/lib/org.functions";
+import { updateEmployeeBaseSalary } from "@/lib/payroll.functions";
 import {
   getTeamMembers,
   getManagers,
@@ -45,6 +47,10 @@ export function TeamSection({ access }: { access: MyAccess }) {
   const changeRole = useServerFn(setStaffRole);
   const decide = useServerFn(decideApproval);
   const removeStaff = useServerFn(deleteStaffAccount);
+  const saveSalary = useServerFn(updateEmployeeBaseSalary);
+
+  const [editingSalaryId, setEditingSalaryId] = useState<string | null>(null);
+  const [salaryVal, setSalaryVal] = useState<number>(0);
 
   const [pendingDelete, setPendingDelete] = useState<
     { user_id: string; name: string; email: string; roles: string[] } | null
@@ -66,6 +72,7 @@ export function TeamSection({ access }: { access: MyAccess }) {
     designation: "",
     department: "",
     manager_id: "",
+    base_salary: 0,
   });
 
   const rows = useMemo(
@@ -77,6 +84,7 @@ export function TeamSection({ access }: { access: MyAccess }) {
     void qc.invalidateQueries({ queryKey: ["team-members"] });
     void qc.invalidateQueries({ queryKey: ["team-approvals"] });
     void qc.invalidateQueries({ queryKey: ["team-stats"] });
+    void qc.invalidateQueries({ queryKey: ["payroll-workspace"] });
   }
 
   async function handleCreate(e: React.FormEvent) {
@@ -92,6 +100,7 @@ export function TeamSection({ access }: { access: MyAccess }) {
           designation: form.designation.trim(),
           department: form.department.trim(),
           manager_id: form.manager_id || null,
+          base_salary: Number(form.base_salary) > 0 ? Number(form.base_salary) : 0,
         },
       });
       setMsg({ kind: "ok", text: `Account created for ${form.email}` });
@@ -103,6 +112,7 @@ export function TeamSection({ access }: { access: MyAccess }) {
         designation: "",
         department: "",
         manager_id: "",
+        base_salary: 0,
       });
       refresh();
       setTab("team");
@@ -189,6 +199,7 @@ export function TeamSection({ access }: { access: MyAccess }) {
                   <th className="px-4 py-3">Email</th>
                   <th className="px-4 py-3">Designation</th>
                   <th className="px-4 py-3">Role</th>
+                  <th className="px-4 py-3">Base Salary</th>
                   <th className="px-4 py-3">Reporting to</th>
                   {access.isSuper ? <th className="px-4 py-3">Manage</th> : null}
                 </tr>
@@ -196,13 +207,13 @@ export function TeamSection({ access }: { access: MyAccess }) {
               <tbody>
                 {team.isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
+                    <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
                       Loading…
                     </td>
                   </tr>
                 ) : rows.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
+                    <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
                       No team members yet. Use “Add Account” to create one.
                     </td>
                   </tr>
@@ -221,6 +232,70 @@ export function TeamSection({ access }: { access: MyAccess }) {
                         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-primary">
                           {m.roles.join(", ") || "employee"}
                         </span>
+                      </td>
+                      {/* Base Salary editable column */}
+                      <td className="px-4 py-3">
+                        {editingSalaryId === m.user_id ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-muted-foreground">₹</span>
+                            <input
+                              type="number"
+                              min="0"
+                              step="500"
+                              value={salaryVal || ""}
+                              onChange={(e) => setSalaryVal(Number(e.target.value))}
+                              className="w-20 rounded border border-primary px-1.5 py-0.5 text-xs font-bold bg-background focus:outline-none"
+                              autoFocus
+                            />
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await saveSalary({ data: { user_id: m.user_id, salary: Number(salaryVal) } });
+                                  toast.success(`Base salary updated to ₹${Number(salaryVal).toLocaleString("en-IN")}`);
+                                  setEditingSalaryId(null);
+                                  refresh();
+                                } catch (err: unknown) {
+                                  toast.error(err instanceof Error ? err.message : "Failed to update salary");
+                                }
+                              }}
+                              className="rounded bg-primary px-2.5 py-1 text-[11px] font-bold text-primary-foreground hover:bg-primary/90 transition-colors shadow-2xs"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingSalaryId(null)}
+                              className="rounded border border-input px-1.5 py-1 text-[11px] text-muted-foreground hover:bg-secondary transition-colors"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : m.base_salary <= 0 ? (
+                          <button
+                            onClick={() => {
+                              setEditingSalaryId(m.user_id);
+                              setSalaryVal(0);
+                            }}
+                            className="inline-flex items-center gap-1 rounded bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[11px] font-semibold text-amber-600 hover:bg-amber-500/20"
+                          >
+                            + Set Salary
+                          </button>
+                        ) : (
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-semibold text-foreground text-xs">
+                              ₹{m.base_salary.toLocaleString("en-IN")}
+                            </span>
+                            <button
+                              onClick={() => {
+                                setEditingSalaryId(m.user_id);
+                                setSalaryVal(m.base_salary);
+                              }}
+                              className="rounded border border-border bg-secondary/60 hover:bg-secondary p-1 text-muted-foreground hover:text-foreground"
+                              title="Edit salary"
+                            >
+                              <Edit2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">{m.manager_name || "—"}</td>
                       {access.isSuper ? (
@@ -418,6 +493,18 @@ export function TeamSection({ access }: { access: MyAccess }) {
                 className={inputCls}
                 value={form.department}
                 onChange={(e) => setForm({ ...form, department: e.target.value })}
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="font-medium">Monthly Base Salary (₹)</span>
+              <input
+                type="number"
+                min="0"
+                step="500"
+                placeholder="e.g. 45000"
+                className={inputCls}
+                value={form.base_salary || ""}
+                onChange={(e) => setForm({ ...form, base_salary: Number(e.target.value) })}
               />
             </label>
             {access.isSuper ? (

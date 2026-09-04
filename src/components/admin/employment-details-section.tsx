@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckSquare, Loader2, Trash2, Upload } from "lucide-react";
+import { CheckSquare, Loader2, Trash2, Upload, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getEmploymentProfile,
@@ -113,6 +113,17 @@ function ProfileStatusTab() {
   const { data: personal } = useQuery({ queryKey: ["emp-personal"], queryFn: () => fetchPersonal() });
   const { data: docs } = useQuery({ queryKey: ["emp-docs"], queryFn: () => fetchDocs() });
 
+  const roleQuery = useQuery({
+    queryKey: ["current-user-roles"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      return (data ?? []).map((r) => r.role);
+    },
+  });
+  const isManagement = (roleQuery.data ?? []).some((r) => r === "admin" || r === "ceo");
+
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState<EmploymentProfileInput>(emptyProfile);
   const [error, setError] = useState("");
@@ -218,31 +229,38 @@ function ProfileStatusTab() {
               </Field>
               <Field label="Designation">
                 <input
-                  className={inputCls}
+                  className={`${inputCls} ${!isManagement ? "bg-muted/40 cursor-not-allowed text-muted-foreground" : ""}`}
+                  disabled={!isManagement}
+                  readOnly={!isManagement}
                   value={form.designation}
-                  onChange={(e) => setForm({ ...form, designation: e.target.value })}
+                  onChange={(e) => isManagement && setForm({ ...form, designation: e.target.value })}
                 />
               </Field>
               <Field label="Employee ID">
                 <input
-                  className={inputCls}
+                  className={`${inputCls} ${!isManagement ? "bg-muted/40 cursor-not-allowed text-muted-foreground" : ""}`}
+                  disabled={!isManagement}
+                  readOnly={!isManagement}
                   value={form.employee_code}
-                  onChange={(e) => setForm({ ...form, employee_code: e.target.value })}
+                  onChange={(e) => isManagement && setForm({ ...form, employee_code: e.target.value })}
                 />
               </Field>
               <Field label="Joining Date">
                 <input
                   type="date"
-                  className={inputCls}
+                  className={`${inputCls} ${!isManagement ? "bg-muted/40 cursor-not-allowed text-muted-foreground" : ""}`}
+                  disabled={!isManagement}
+                  readOnly={!isManagement}
                   value={form.joining_date ?? ""}
-                  onChange={(e) => setForm({ ...form, joining_date: e.target.value || null })}
+                  onChange={(e) => isManagement && setForm({ ...form, joining_date: e.target.value || null })}
                 />
               </Field>
               <Field label="Employment Type">
                 <select
-                  className={inputCls}
+                  className={`${inputCls} ${!isManagement ? "bg-muted/40 cursor-not-allowed text-muted-foreground" : ""}`}
+                  disabled={!isManagement}
                   value={form.employment_type}
-                  onChange={(e) => setForm({ ...form, employment_type: e.target.value })}
+                  onChange={(e) => isManagement && setForm({ ...form, employment_type: e.target.value })}
                 >
                   {["Full-Time", "Part-Time", "Intern", "Contract"].map((o) => (
                     <option key={o}>{o}</option>
@@ -262,9 +280,10 @@ function ProfileStatusTab() {
               </Field>
               <Field label="Status">
                 <select
-                  className={inputCls}
+                  className={`${inputCls} ${!isManagement ? "bg-muted/40 cursor-not-allowed text-muted-foreground" : ""}`}
+                  disabled={!isManagement}
                   value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  onChange={(e) => isManagement && setForm({ ...form, status: e.target.value })}
                 >
                   {["Active", "Probation", "Notice Period", "Inactive"].map((o) => (
                     <option key={o}>{o}</option>
@@ -272,12 +291,26 @@ function ProfileStatusTab() {
                 </select>
               </Field>
               <Field label="Salary (₹)">
-                <input
-                  type="number"
-                  className={inputCls}
-                  value={form.salary}
-                  onChange={(e) => setForm({ ...form, salary: Number(e.target.value) })}
-                />
+                {isManagement ? (
+                  <input
+                    type="number"
+                    min="0"
+                    className={inputCls}
+                    value={form.salary}
+                    onChange={(e) => setForm({ ...form, salary: Number(e.target.value) })}
+                  />
+                ) : (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      disabled
+                      readOnly
+                      className={`${inputCls} bg-muted/40 cursor-not-allowed pr-8 text-muted-foreground font-semibold`}
+                      value={form.salary ? `₹${Number(form.salary).toLocaleString("en-IN")}` : "₹0"}
+                    />
+                    <Lock className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  </div>
+                )}
               </Field>
               <Field label="Work Location">
                 <input
@@ -307,29 +340,33 @@ function ProfileStatusTab() {
                   onChange={(e) => setForm({ ...form, manager_email: e.target.value })}
                 />
               </Field>
-              <label className="flex items-center gap-2 text-sm sm:col-span-2">
-                <input
-                  type="checkbox"
-                  checked={form.is_verified}
-                  onChange={(e) => setForm({ ...form, is_verified: e.target.checked })}
-                />
-                Profile verified
-              </label>
-              <Field label="Verified By">
-                <input
-                  className={inputCls}
-                  value={form.verified_by}
-                  onChange={(e) => setForm({ ...form, verified_by: e.target.value })}
-                />
-              </Field>
-              <Field label="Verified On">
-                <input
-                  type="date"
-                  className={inputCls}
-                  value={form.verified_on ?? ""}
-                  onChange={(e) => setForm({ ...form, verified_on: e.target.value || null })}
-                />
-              </Field>
+              {isManagement ? (
+                <>
+                  <label className="flex items-center gap-2 text-sm sm:col-span-2">
+                    <input
+                      type="checkbox"
+                      checked={form.is_verified}
+                      onChange={(e) => setForm({ ...form, is_verified: e.target.checked })}
+                    />
+                    Profile verified
+                  </label>
+                  <Field label="Verified By">
+                    <input
+                      className={inputCls}
+                      value={form.verified_by}
+                      onChange={(e) => setForm({ ...form, verified_by: e.target.value })}
+                    />
+                  </Field>
+                  <Field label="Verified On">
+                    <input
+                      type="date"
+                      className={inputCls}
+                      value={form.verified_on ?? ""}
+                      onChange={(e) => setForm({ ...form, verified_on: e.target.value || null })}
+                    />
+                  </Field>
+                </>
+              ) : null}
               {error ? <p className="text-sm text-destructive sm:col-span-2">{error}</p> : null}
               <div className="sm:col-span-2">
                 <button

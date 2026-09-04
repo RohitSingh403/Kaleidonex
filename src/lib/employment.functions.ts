@@ -64,10 +64,40 @@ export const saveEmploymentProfile = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .validator((input: EmploymentProfileInput) => input)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
+    // 1. Fetch existing profile so protected fields cannot be altered by non-leadership
+    const { data: existing } = await context.supabase
       .from("employee_profile")
-      .upsert({ ...data, user_id: context.userId }, { onConflict: "user_id" });
+      .select("*")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+
+    const isManagement = context.isSuper;
+
+    const payload: Record<string, unknown> = {
+      user_id: context.userId,
+      full_name: data.full_name,
+      work_mode: data.work_mode,
+      work_location: data.work_location,
+      working_organisation: data.working_organisation,
+      manager_name: data.manager_name,
+      manager_email: data.manager_email,
+      // Management-only fields
+      designation: isManagement ? data.designation : (existing?.designation ?? data.designation),
+      employee_code: isManagement ? data.employee_code : (existing?.employee_code ?? data.employee_code),
+      joining_date: isManagement ? data.joining_date : (existing?.joining_date ?? data.joining_date),
+      employment_type: isManagement ? data.employment_type : (existing?.employment_type ?? data.employment_type),
+      status: isManagement ? data.status : (existing?.status ?? "Active"),
+      salary: isManagement ? Number(data.salary || 0) : Number(existing?.salary ?? 0),
+      is_verified: isManagement ? data.is_verified : (existing?.is_verified ?? false),
+      verified_by: isManagement ? data.verified_by : (existing?.verified_by ?? ""),
+      verified_on: isManagement ? data.verified_on : (existing?.verified_on ?? null),
+    };
+
+    const { error } = await (context.supabase as any)
+      .from("employee_profile")
+      .upsert(payload, { onConflict: "user_id" });
     if (error) throw new Error(error.message);
+
     return { ok: true };
   });
 

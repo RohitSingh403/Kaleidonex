@@ -31,6 +31,7 @@ export type WorkforceRow = {
   currentProject: string;
   pendingLeaves: number;
   managerRating: number;
+  salary: number;
 };
 
 export type WorkforceSnapshot = {
@@ -70,11 +71,13 @@ export const getWorkforceSnapshot = createServerFn({ method: "GET" })
     const [profilesRes, employmentRes, rolesRes, attendanceRes, tasksRes, leavesRes, claimsRes, reqRes, projectsRes, reviewsRes, deptRes] =
       await Promise.all([
         context.supabase.from("profiles").select("id, full_name"),
-        context.supabase.from("employee_profile").select("*"),
+        context.supabase
+          .from("employee_profile")
+          .select("user_id, full_name, employee_code, department, designation, status, manager_id, manager_name, joining_date, salary"),
         context.supabase.from("user_roles").select("user_id, role"),
         context.supabase.from("attendance").select("user_id, work_date, status, check_in, check_out").gte("work_date", since),
         context.supabase.from("tasks").select("id, user_id, title, status, due_date, progress, project_id, updated_at"),
-        context.supabase.from("leave_applications").select("id, user_id, status, days, start_date, end_date, leave_type"),
+        context.supabase.from("leave_applications").select("id, user_id, status"),
         context.supabase.from("expense_claims").select("id, user_id, status, amount"),
         context.supabase.from("employee_requests").select("id, user_id, status"),
         context.supabase.from("projects").select("id, name"),
@@ -144,6 +147,7 @@ export const getWorkforceSnapshot = createServerFn({ method: "GET" })
         currentProject: active?.project_id ? (projectName.get(active.project_id) ?? "") : (active?.title ?? ""),
         pendingLeaves: (leavesRes.data ?? []).filter((l) => l.user_id === id && l.status === "pending").length,
         managerRating: rating,
+        salary: Number(e["salary"] || 0),
       });
     }
 
@@ -270,8 +274,15 @@ export const getEmployee360 = createServerFn({ method: "GET" })
       personalRow.aadhaar_no = "••••";
     }
 
+    const profileData = profile.data
+      ? {
+          ...profile.data,
+          salary: Number((profile.data as Record<string, unknown>)["salary"] || 0),
+        }
+      : null;
+
     return {
-      profile: profile.data,
+      profile: profileData,
       personal: personalRow,
       sensitiveMasked: !canSeeSensitive,
       attendance: attendance.data ?? [],
@@ -657,24 +668,35 @@ export const setEmployeeStatus = createServerFn({ method: "POST" })
 export const updateEmployeeAssignment = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
   .validator(
-    (input: { user_id: string; department: string; designation: string; department_id: string | null }) => input,
+    (input: {
+      user_id: string;
+      department: string;
+      designation: string;
+      department_id: string | null;
+      salary?: number | null;
+    }) => input,
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const updates: Record<string, unknown> = {
+      department: data.department,
+      designation: data.designation,
+      department_id: data.department_id,
+    };
+    if (data.salary !== undefined && data.salary !== null) {
+      updates["salary"] = Number(data.salary);
+    }
+    const { error } = await (supabaseAdmin as any)
       .from("employee_profile")
-      .update({
-        department: data.department,
-        designation: data.designation,
-        department_id: data.department_id,
-      })
+      .update(updates)
       .eq("user_id", data.user_id);
     if (error) throw new Error(error.message);
+
     await logAudit(context, {
       action: "employee.assignment.update",
       target_type: "employee",
       target_id: data.user_id,
-      details: `${data.department} · ${data.designation}`,
+      details: `${data.department} · ${data.designation}${data.salary != null ? ` · ₹${data.salary}` : ""}`,
     });
     return { ok: true };
   });

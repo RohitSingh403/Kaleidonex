@@ -14,7 +14,15 @@ import {
   BellRing,
   Download,
   Megaphone,
+  MoreHorizontal,
+  Eye,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   getWorkforceSnapshot,
   getAttendanceCorrections,
@@ -255,27 +263,44 @@ export function HrDashboard({ initialTab = "dashboard", showTabBar = false }: { 
           }
         >
           <DataTable
-            headers={["Employee", "ID", "Department", "Designation", "Status", "Attendance", "Project", "Performance", "Joined", ""]}
+            headers={["Employee", "ID", "Department", "Designation", "Base Salary", "Status", "Attendance", "Project", "Performance", "Joined", ""]}
             isEmpty={rows.length === 0}
             empty="No employees assigned to you yet."
           >
             {rows.map((r) => (
-              <tr key={r.user_id}>
-                <td className="py-2 pr-4 font-medium">{r.full_name || "—"}</td>
-                <td className="py-2 pr-4 text-muted-foreground">{r.employee_code || "—"}</td>
-                <td className="py-2 pr-4">{r.department || "—"}</td>
-                <td className="py-2 pr-4">{r.designation || "—"}</td>
-                <td className="py-2 pr-4">
+              <tr key={r.user_id} className="hover:bg-muted/30 transition-colors">
+                <td className="py-2.5 pr-4 font-medium whitespace-nowrap">{r.full_name || "—"}</td>
+                <td className="py-2.5 pr-4 text-muted-foreground whitespace-nowrap">{r.employee_code || "—"}</td>
+                <td className="py-2.5 pr-4 text-muted-foreground whitespace-nowrap">{r.department || "—"}</td>
+                <td className="py-2.5 pr-4 text-muted-foreground whitespace-nowrap">{r.designation || "—"}</td>
+                <td className="py-2.5 pr-4 font-semibold text-foreground whitespace-nowrap">
+                  ₹{Number(r.salary || 0).toLocaleString("en-IN")}
+                </td>
+                <td className="py-2.5 pr-4 whitespace-nowrap">
                   <StatusPill value={r.status} />
                 </td>
-                <td className="py-2 pr-4">{r.attendancePct}%</td>
-                <td className="py-2 pr-4 text-muted-foreground">{r.currentProject || "—"}</td>
-                <td className="py-2 pr-4">{r.completionPct}%</td>
-                <td className="py-2 pr-4">{r.joining_date ?? "—"}</td>
-                <td className="py-2 pr-4">
-                  <button className={btnGhost} onClick={() => setOpen({ id: r.user_id, name: r.full_name })}>
-                    View
-                  </button>
+                <td className="py-2.5 pr-4 whitespace-nowrap">{r.attendancePct}%</td>
+                <td className="py-2.5 pr-4 text-muted-foreground whitespace-nowrap">{r.currentProject || "—"}</td>
+                <td className="py-2.5 pr-4 whitespace-nowrap">{r.completionPct}%</td>
+                <td className="py-2.5 pr-4 whitespace-nowrap">{r.joining_date ?? "—"}</td>
+                <td className="py-2.5 pr-4 whitespace-nowrap">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Actions</span>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-44 bg-card border border-border shadow-md rounded-lg p-1 z-50">
+                      <DropdownMenuItem
+                        onClick={() => setOpen({ id: r.user_id, name: r.full_name })}
+                        className="flex items-center gap-2 px-3 py-2 text-xs rounded cursor-pointer hover:bg-secondary transition-colors"
+                      >
+                        <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span>View 360 Profile</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </td>
               </tr>
             ))}

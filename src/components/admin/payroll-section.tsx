@@ -158,49 +158,62 @@ export function PayrollSection() {
   return (
     <div className="space-y-6">
       {/* Header & Controls */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Payroll &amp; Salary Calculation</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">
+              <Banknote className="h-4 w-4" />
+            </span>
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Payroll &amp; Salary Calculation</h1>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground max-w-2xl">
             Configure employee base salaries and compute payouts based on attendance, with paid leaves automatically credited.
           </p>
         </div>
 
+        {/* Compact Single-Row Toolbar on Desktop */}
         <div className="flex flex-wrap items-center gap-2">
-          <CustomSelect
-            value={month}
-            onValueChange={(val) => setMonth(Number(val))}
-            options={months.map((m, idx) => ({ value: idx + 1, label: m }))}
-          />
-          <CustomSelect
-            value={year}
-            onValueChange={(val) => setYear(Number(val))}
-            options={[year - 1, year, year + 1].map((y) => ({ value: y, label: String(y) }))}
-          />
+          <div className="w-[140px]">
+            <CustomSelect
+              value={month}
+              onValueChange={(val) => setMonth(Number(val))}
+              options={months.map((m, idx) => ({ value: idx + 1, label: m }))}
+              triggerClassName="w-full bg-card h-9"
+            />
+          </div>
+          <div className="w-[105px]">
+            <CustomSelect
+              value={year}
+              onValueChange={(val) => setYear(Number(val))}
+              options={[year - 1, year, year + 1].map((y) => ({ value: y, label: String(y) }))}
+              triggerClassName="w-full bg-card h-9"
+            />
+          </div>
 
           <button
             onClick={() => queryClient.invalidateQueries({ queryKey: ["payroll-workspace"] })}
             disabled={isFetching}
-            className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-secondary transition-colors"
+            className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-semibold hover:bg-muted transition-colors shadow-2xs cursor-pointer"
+            title="Refresh Data"
           >
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-            Refresh
+            <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin text-primary" : ""}`} />
+            <span>Refresh</span>
           </button>
 
           <button
             onClick={exportPayrollCsv}
-            className="flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary px-3 py-2 text-sm font-semibold hover:bg-primary/20 transition-colors"
+            className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted transition-colors shadow-2xs cursor-pointer"
           >
-            <FileSpreadsheet className="h-4 w-4" />
-            Export CSV
+            <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
+            <span>Export CSV</span>
           </button>
 
           <button
             onClick={handleGenerateAll}
-            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-soft hover:bg-primary/90 transition-all"
+            className="flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-all cursor-pointer"
           >
-            <Sparkles className="h-4 w-4" />
-            Calculate &amp; Sync All
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Calculate &amp; Sync All</span>
           </button>
         </div>
       </div>

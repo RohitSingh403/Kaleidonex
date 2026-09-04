@@ -62,7 +62,7 @@ export function CustomSelect({
     <Select {...(selectProps as any)}>
       <SelectTrigger
         className={cn(
-          "h-9 min-w-[120px] rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm shadow-xs transition-all hover:bg-secondary/60 focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer",
+          "h-9 w-full min-w-0 rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm shadow-xs transition-all hover:bg-secondary/60 focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer",
           triggerClassName,
           className,
         )}

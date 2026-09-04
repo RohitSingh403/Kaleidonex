@@ -13,6 +13,24 @@ import {
   btnPrimary,
   Panel,
 } from "@/components/admin/workforce-ui";
+import {
+  CalendarCheck,
+  ListTodo,
+  Star,
+  IndianRupee,
+  Briefcase,
+  Building2,
+  User,
+  Mail,
+  Phone,
+  ShieldCheck,
+  MapPin,
+  Calendar,
+  CreditCard,
+  FileText,
+  Activity as ActivityIcon,
+  CheckCircle2,
+} from "lucide-react";
 
 type Tab =
   | "overview"
@@ -25,23 +43,30 @@ type Tab =
   | "documents"
   | "activity";
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "overview", label: "Overview" },
-  { id: "personal", label: "Personal" },
-  { id: "employment", label: "Employment" },
-  { id: "attendance", label: "Attendance" },
-  { id: "leave", label: "Leave" },
-  { id: "tasks", label: "Tasks" },
-  { id: "performance", label: "Performance" },
-  { id: "documents", label: "Documents" },
-  { id: "activity", label: "Activity" },
+const TABS: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: "overview", label: "Overview", icon: User },
+  { id: "personal", label: "Personal", icon: FileText },
+  { id: "employment", label: "Employment", icon: Briefcase },
+  { id: "attendance", label: "Attendance", icon: CalendarCheck },
+  { id: "leave", label: "Leave", icon: Calendar },
+  { id: "tasks", label: "Tasks", icon: ListTodo },
+  { id: "performance", label: "Performance", icon: Star },
+  { id: "documents", label: "Documents", icon: FileText },
+  { id: "activity", label: "Activity", icon: ActivityIcon },
 ];
 
-function Row({ label, value }: { label: string; value: string | number | null | undefined }) {
+function InfoCard({ label, value, icon: Icon, tone }: { label: string; value: React.ReactNode; icon?: React.ComponentType<{ className?: string }>; tone?: string }) {
   return (
-    <div className="flex justify-between gap-4 border-b border-border py-1.5 text-sm last:border-0">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium">{value || "—"}</span>
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card/60 p-3.5 transition-colors hover:bg-card">
+      <div className="flex items-center gap-2.5 min-w-0">
+        {Icon ? (
+          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${tone ?? "bg-primary/10 text-primary"}`}>
+            <Icon className="h-4 w-4" />
+          </span>
+        ) : null}
+        <span className="truncate text-xs font-medium text-muted-foreground">{label}</span>
+      </div>
+      <span className="shrink-0 text-right text-xs font-semibold text-foreground">{value || "—"}</span>
     </div>
   );
 }
@@ -97,85 +122,148 @@ export function Employee360({
   }
 
   return (
-    <Drawer open onClose={onClose} title={name || "Employee"} subtitle={d?.profile?.designation ?? ""}>
-      <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+    <Drawer open onClose={onClose} title={name || "Employee Profile"} subtitle={d?.profile?.designation ?? "Employee 360 View"}>
+      {/* Horizontally scrolling tab navigation */}
+      <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto rounded-xl border border-border bg-muted/40 p-1.5 shadow-xs">
+        {TABS.map((t) => {
+          const Icon = t.icon;
+          const isActive = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "text-muted-foreground hover:bg-card hover:text-foreground"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              <span>{t.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {q.isLoading ? <p className="text-sm text-muted-foreground">Loading employee record…</p> : null}
+      {q.isLoading ? (
+        <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+          Loading comprehensive employee 360 record…
+        </div>
+      ) : null}
 
       {tab === "overview" && d ? (
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-border bg-card p-3">
-              <p className="text-xs text-muted-foreground">Attendance</p>
-              <p className="text-xl font-bold">{pct(present, attendance.length)}%</p>
+          {/* Top Metric Cards */}
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-soft">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">Attendance</span>
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-emerald-500/15 text-emerald-600">
+                  <CalendarCheck className="h-4 w-4" />
+                </span>
+              </div>
+              <p className="mt-2 text-2xl font-bold font-display">{pct(present, attendance.length)}%</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{present} active days recorded</p>
             </div>
-            <div className="rounded-lg border border-border bg-card p-3">
-              <p className="text-xs text-muted-foreground">Task completion</p>
-              <p className="text-xl font-bold">{pct(done.length, tasks.length)}%</p>
+            <div className="rounded-xl border border-border bg-card p-4 shadow-soft">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">Task Completion</span>
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-sky-500/15 text-sky-600">
+                  <ListTodo className="h-4 w-4" />
+                </span>
+              </div>
+              <p className="mt-2 text-2xl font-bold font-display">{pct(done.length, tasks.length)}%</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{done.length} of {tasks.length} tasks completed</p>
             </div>
-            <div className="rounded-lg border border-border bg-card p-3">
-              <p className="text-xs text-muted-foreground">Manager rating</p>
-              <p className="text-xl font-bold">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-soft">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">Manager Rating</span>
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-amber-500/15 text-amber-600">
+                  <Star className="h-4 w-4" />
+                </span>
+              </div>
+              <p className="mt-2 text-2xl font-bold font-display">
                 {d.reviews[0] ? `${Number(d.reviews[0].manager_rating).toFixed(1)} / 5` : "—"}
               </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{d.reviews.length} performance reviews</p>
             </div>
           </div>
-          <div className="rounded-lg border border-border bg-card p-4">
-            <Row label="Employee code" value={d.profile?.employee_code} />
-            <Row label="Department" value={d.profile?.department} />
-            <Row label="Designation" value={d.profile?.designation} />
-            <Row
-              label="Monthly Base Salary"
-              value={d.profile?.salary ? `₹${Number(d.profile.salary).toLocaleString("en-IN")}` : "₹0"}
-            />
-            <Row label="Reporting to" value={d.profile?.manager_name} />
-            <Row label="Joining date" value={d.profile?.joining_date} />
-            <Row label="Status" value={d.profile?.status} />
+
+          {/* Detailed Info Grid */}
+          <div className="rounded-xl border border-border bg-card p-4 shadow-soft">
+            <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Core Employment Profile
+            </h4>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <InfoCard label="Employee Code" value={d.profile?.employee_code} icon={Building2} />
+              <InfoCard label="Department" value={d.profile?.department} icon={Briefcase} />
+              <InfoCard label="Designation" value={d.profile?.designation} icon={User} />
+              <InfoCard
+                label="Monthly Base Salary"
+                value={
+                  <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 font-bold text-emerald-600 dark:text-emerald-400">
+                    {d.profile?.salary ? `₹${Number(d.profile.salary).toLocaleString("en-IN")}` : "₹0"}
+                  </span>
+                }
+                icon={IndianRupee}
+                tone="bg-emerald-500/15 text-emerald-600"
+              />
+              <InfoCard label="Reporting To" value={d.profile?.manager_name} icon={User} />
+              <InfoCard label="Joining Date" value={d.profile?.joining_date} icon={Calendar} />
+              <InfoCard
+                label="Status"
+                value={<StatusPill value={d.profile?.status ?? "active"} />}
+                icon={CheckCircle2}
+              />
+              <InfoCard label="Work Location" value={d.profile?.work_location} icon={MapPin} />
+            </div>
           </div>
         </div>
       ) : null}
 
       {tab === "personal" && d ? (
-        <div className="rounded-lg border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-soft space-y-4">
           {d.sensitiveMasked ? (
-            <p className="mb-3 rounded-md bg-secondary px-3 py-2 text-xs text-muted-foreground">
+            <p className="rounded-md bg-secondary/80 px-3 py-2 text-xs text-muted-foreground">
               Bank, PAN and Aadhaar details are hidden at your permission level.
             </p>
           ) : null}
-          <Row label="Contact" value={d.personal?.contact_number} />
-          <Row label="Personal email" value={d.personal?.personal_email} />
-          <Row label="Date of birth" value={d.personal?.date_of_birth} />
-          <Row label="Blood group" value={d.personal?.blood_group} />
-          <Row label="Emergency contact" value={`${d.personal?.emergency_name ?? ""} ${d.personal?.emergency_number ?? ""}`} />
-          <Row label="Current city" value={d.personal?.cur_city} />
-          <Row label="Bank account" value={d.personal?.bank_account_number} />
-          <Row label="PAN" value={d.personal?.pan_no} />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <InfoCard label="Contact Number" value={d.personal?.contact_number} icon={Phone} />
+            <InfoCard label="Personal Email" value={d.personal?.personal_email} icon={Mail} />
+            <InfoCard label="Date of Birth" value={d.personal?.date_of_birth} icon={Calendar} />
+            <InfoCard label="Blood Group" value={d.personal?.blood_group} icon={ActivityIcon} />
+            <InfoCard
+              label="Emergency Contact"
+              value={`${d.personal?.emergency_name ?? ""} ${d.personal?.emergency_number ? `(${d.personal.emergency_number})` : ""}`}
+              icon={Phone}
+            />
+            <InfoCard label="Current City" value={d.personal?.cur_city} icon={MapPin} />
+            <InfoCard label="Bank Account" value={d.personal?.bank_account_number} icon={CreditCard} />
+            <InfoCard label="PAN No." value={d.personal?.pan_no} icon={ShieldCheck} />
+          </div>
         </div>
       ) : null}
 
       {tab === "employment" && d ? (
-        <div className="rounded-lg border border-border bg-card p-4">
-          <Row label="Employment type" value={d.profile?.employment_type} />
-          <Row
-            label="Monthly Base Salary"
-            value={d.profile?.salary ? `₹${Number(d.profile.salary).toLocaleString("en-IN")}` : "₹0"}
-          />
-          <Row label="Work mode" value={d.profile?.work_mode} />
-          <Row label="Work location" value={d.profile?.work_location} />
-          <Row label="Organisation" value={d.profile?.working_organisation} />
-          <Row label="Verified" value={d.profile?.is_verified ? "Yes" : "No"} />
+        <div className="rounded-xl border border-border bg-card p-4 shadow-soft space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <InfoCard label="Employment Type" value={d.profile?.employment_type} icon={Briefcase} />
+            <InfoCard
+              label="Monthly Base Salary"
+              value={
+                <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 font-bold text-emerald-600 dark:text-emerald-400">
+                  {d.profile?.salary ? `₹${Number(d.profile.salary).toLocaleString("en-IN")}` : "₹0"}
+                </span>
+              }
+              icon={IndianRupee}
+              tone="bg-emerald-500/15 text-emerald-600"
+            />
+            <InfoCard label="Work Mode" value={d.profile?.work_mode} icon={Briefcase} />
+            <InfoCard label="Work Location" value={d.profile?.work_location} icon={MapPin} />
+            <InfoCard label="Working Organisation" value={d.profile?.working_organisation} icon={Building2} />
+            <InfoCard label="Profile Verified" value={d.profile?.is_verified ? "Yes" : "No"} icon={ShieldCheck} />
+          </div>
         </div>
       ) : null}
 
@@ -233,7 +321,7 @@ export function Employee360({
 
       {tab === "performance" && d ? (
         <div className="space-y-4">
-          <div className="space-y-3 rounded-lg border border-border bg-card p-4">
+          <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-soft">
             <PercentBar label="Task completion" pctValue={pct(done.length, tasks.length)} />
             <PercentBar
               label="On-time delivery"

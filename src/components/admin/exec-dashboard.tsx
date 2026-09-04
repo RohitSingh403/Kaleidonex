@@ -123,6 +123,8 @@ export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: 
   }, [audit.data, auditQuery, auditAction, auditFrom, auditTo]);
 
 
+  const [deptParent, setDeptParent] = useState("");
+  const [deptHead, setDeptHead] = useState("");
   const [editingEmployee, setEditingEmployee] = useState<WorkforceRow | null>(null);
   const [editForm, setEditForm] = useState<{ department: string; designation: string; salary: string }>({
     department: "",
@@ -190,11 +192,13 @@ export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: 
       await saveDepartment({
         data: {
           name: String(f.get("name") ?? ""),
-          parent_id: (String(f.get("parent") ?? "") || null) as string | null,
-          head_id: (String(f.get("head") ?? "") || null) as string | null,
+          parent_id: (deptParent || (String(f.get("parent") ?? "") || null)) as string | null,
+          head_id: (deptHead || (String(f.get("head") ?? "") || null)) as string | null,
         },
       });
       form.reset();
+      setDeptParent("");
+      setDeptHead("");
       setMsg("Department saved.");
       await qc.invalidateQueries({ queryKey: ["departments"] });
     } catch (err) {
@@ -352,23 +356,20 @@ export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: 
                 <td className="py-2.5 pr-4 font-semibold text-foreground whitespace-nowrap">
                   ₹{Number(r.salary || 0).toLocaleString("en-IN")}
                 </td>
-                <td className="py-2.5 pr-4 whitespace-nowrap">
-                  <select
+                <td className="py-2.5 pr-4 whitespace-nowrap min-w-[150px]">
+                  <CustomSelect
                     value={r.manager_id ?? ""}
-                    onChange={async (e) => {
-                      await setManager({ data: { user_id: r.user_id, manager_id: e.target.value || null } });
+                    onValueChange={async (val) => {
+                      await setManager({ data: { user_id: r.user_id, manager_id: val || null } });
                       await qc.invalidateQueries({ queryKey: ["workforce-snapshot"] });
                       toast.success("Reporting manager updated");
                     }}
-                    className="rounded border border-border bg-background px-2 py-1 text-xs"
-                  >
-                    <option value="">Unassigned</option>
-                    {hrRows.map((h) => (
-                      <option key={h.user_id} value={h.user_id}>
-                        {h.full_name}
-                      </option>
-                    ))}
-                  </select>
+                    options={[
+                      { value: "", label: "Unassigned" },
+                      ...hrRows.map((h) => ({ value: h.user_id, label: h.full_name })),
+                    ]}
+                    triggerClassName="h-8 text-xs w-full"
+                  />
                 </td>
                 <td className="py-2.5 pr-4 whitespace-nowrap">
                   <StatusPill value={r.status} />
@@ -447,24 +448,28 @@ export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: 
                 <input name="name" required className={inputClass} placeholder="Engineering" />
               </Field>
               <Field label="Parent">
-                <select name="parent" className={inputClass}>
-                  <option value="">None</option>
-                  {(departments.data ?? []).map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
+                <CustomSelect
+                  name="parent"
+                  value={deptParent}
+                  onValueChange={setDeptParent}
+                  options={[
+                    { value: "", label: "None" },
+                    ...(departments.data ?? []).map((d) => ({ value: d.id, label: d.name })),
+                  ]}
+                  triggerClassName="w-full"
+                />
               </Field>
               <Field label="Department head">
-                <select name="head" className={inputClass}>
-                  <option value="">Unassigned</option>
-                  {rows.map((r) => (
-                    <option key={r.user_id} value={r.user_id}>
-                      {r.full_name}
-                    </option>
-                  ))}
-                </select>
+                <CustomSelect
+                  name="head"
+                  value={deptHead}
+                  onValueChange={setDeptHead}
+                  options={[
+                    { value: "", label: "Unassigned" },
+                    ...rows.map((r) => ({ value: r.user_id, label: r.full_name })),
+                  ]}
+                  triggerClassName="w-full"
+                />
               </Field>
               <div className="sm:col-span-3">
                 <button className={btnPrimary}>Add department</button>
@@ -801,14 +806,15 @@ export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: 
               />
             </Field>
             <Field label="Action">
-              <select className={inputClass} value={auditAction} onChange={(e) => setAuditAction(e.target.value)}>
-                <option value="">All actions</option>
-                {auditActions.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
-                  </option>
-                ))}
-              </select>
+              <CustomSelect
+                value={auditAction}
+                onValueChange={setAuditAction}
+                options={[
+                  { value: "", label: "All actions" },
+                  ...auditActions.map((a) => ({ value: a, label: a })),
+                ]}
+                triggerClassName="w-full"
+              />
             </Field>
             <Field label="From">
               <input type="date" className={inputClass} value={auditFrom} onChange={(e) => setAuditFrom(e.target.value)} />

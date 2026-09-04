@@ -17,7 +17,7 @@ export const getSections = createServerFn({ method: "GET" })
 
 export const createSection = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { grade: string; name: string }) => input)
+  .validator((input: { grade: string; name: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("sections").insert({
       grade: data.grade.trim(),
@@ -36,7 +36,7 @@ export const createSection = createServerFn({ method: "POST" })
 
 export const deleteSection = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("sections").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -58,7 +58,7 @@ export const getStudents = createServerFn({ method: "GET" })
 
 export const upsertStudent = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       id?: string;
       name: string;
@@ -84,7 +84,7 @@ export const upsertStudent = createServerFn({ method: "POST" })
 
 export const bulkCreateStudents = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { rows: { name: string; email: string; grade: string; roll_no: string }[] }) => input)
+  .validator((input: { rows: { name: string; email: string; grade: string; roll_no: string }[] }) => input)
   .handler(async ({ data, context }) => {
     if (data.rows.length === 0) return { ok: true, count: 0 };
     const { error } = await context.supabase.from("students").insert(data.rows);
@@ -94,7 +94,7 @@ export const bulkCreateStudents = createServerFn({ method: "POST" })
 
 export const deleteStudent = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("students").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -116,7 +116,7 @@ export const getExams = createServerFn({ method: "GET" })
 
 export const upsertExam = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       id?: string;
       title: string;
@@ -142,7 +142,7 @@ export const upsertExam = createServerFn({ method: "POST" })
 
 export const deleteExam = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("exams").delete().eq("id", data.id);
     if (error) throw new Error(error.message);

@@ -116,7 +116,7 @@ export const getManagers = createServerFn({ method: "GET" })
 
 export const createStaffAccount = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator(
+  .validator(
     (input: {
       email: string;
       password: string;
@@ -194,7 +194,7 @@ export const createStaffAccount = createServerFn({ method: "POST" })
 
 export const assignManager = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator((input: { user_id: string; manager_id: string | null }) => input)
+  .validator((input: { user_id: string; manager_id: string | null }) => input)
   .handler(async ({ data, context }) => {
     let managerName = "";
     if (data.manager_id) {
@@ -229,7 +229,7 @@ export const assignManager = createServerFn({ method: "POST" })
 
 export const setStaffRole = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator(
+  .validator(
     (input: { user_id: string; role: "ceo" | "hr" | "employee"; action: "grant" | "revoke" }) =>
       input,
   )
@@ -345,7 +345,7 @@ export const getPendingApprovals = createServerFn({ method: "GET" })
 
 export const decideApproval = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator(
+  .validator(
     (input: {
       kind: "leave" | "claim" | "request";
       id: string;

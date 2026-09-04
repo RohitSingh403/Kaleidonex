@@ -16,7 +16,7 @@ export type BulkAttendanceResult = {
  */
 export const bulkUploadAttendance = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator((input: { csv: string }) => input)
+  .validator((input: { csv: string }) => input)
   .handler(async ({ data, context }): Promise<BulkAttendanceResult> => {
     const allowedStatus = ["present", "absent", "half_day", "leave", "paid_leave", "holiday"];
     const lines = data.csv
@@ -136,7 +136,7 @@ const DEFAULT_CHECKLIST = [
 
 export const seedOnboardingChecklist = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator((input: { user_id: string }) => input)
+  .validator((input: { user_id: string }) => input)
   .handler(async ({ data, context }) => {
     const rows = DEFAULT_CHECKLIST.map((t) => ({
       user_id: data.user_id,
@@ -157,7 +157,7 @@ export const seedOnboardingChecklist = createServerFn({ method: "POST" })
 
 export const addOnboardingTask = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator((input: { user_id: string; title: string; category: string; due_date: string | null }) => input)
+  .validator((input: { user_id: string; title: string; category: string; due_date: string | null }) => input)
   .handler(async ({ data, context }) => {
     if (!data.title.trim()) throw new Error("Enter a task title");
     const { error } = await context.supabase.from("onboarding_tasks").insert({
@@ -173,7 +173,7 @@ export const addOnboardingTask = createServerFn({ method: "POST" })
 
 export const toggleOnboardingTask = createServerFn({ method: "POST" })
   .middleware([requireStaff])
-  .inputValidator((input: { id: string; is_done: boolean }) => input)
+  .validator((input: { id: string; is_done: boolean }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("onboarding_tasks")
@@ -185,7 +185,7 @@ export const toggleOnboardingTask = createServerFn({ method: "POST" })
 
 export const deleteOnboardingTask = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("onboarding_tasks").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -207,7 +207,7 @@ export const getReviewCycles = createServerFn({ method: "GET" })
 
 export const saveReviewCycle = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator(
+  .validator(
     (input: { id?: string; name: string; period_start: string; period_end: string; status: string }) => input,
   )
   .handler(async ({ data, context }) => {
@@ -235,7 +235,7 @@ export const saveReviewCycle = createServerFn({ method: "POST" })
 
 export const deleteReviewCycle = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("review_cycles").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -256,7 +256,7 @@ export const getOneOnOneNotes = createServerFn({ method: "GET" })
 
 export const saveOneOnOneNote = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator(
+  .validator(
     (input: {
       employee_id: string;
       meeting_date: string;
@@ -287,7 +287,7 @@ export const saveOneOnOneNote = createServerFn({ method: "POST" })
 
 export const deleteOneOnOneNote = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("one_on_one_notes").delete().eq("id", data.id);
     if (error) throw new Error(error.message);

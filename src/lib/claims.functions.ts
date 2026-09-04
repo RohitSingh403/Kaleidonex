@@ -18,7 +18,7 @@ export const getExpenseClaims = createServerFn({ method: "GET" })
 
 export const createExpenseClaim = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       expense_date: string;
       category: string;
@@ -60,7 +60,7 @@ export const createExpenseClaim = createServerFn({ method: "POST" })
 /** Only a manager (HR of the claimant) or the CEO may decide a claim — never the claimant. */
 export const updateClaimStatus = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator((input: { id: string; status: "pending" | "approved" | "paid" | "rejected" }) => input)
+  .validator((input: { id: string; status: "pending" | "approved" | "paid" | "rejected" }) => input)
   .handler(async ({ data, context }) => {
     const { data: claim, error: loadError } = await context.supabase
       .from("expense_claims")
@@ -157,7 +157,7 @@ export const updateClaimStatus = createServerFn({ method: "POST" })
 /** The claimant may withdraw a pending claim; managers may remove claims in their scope. */
 export const deleteExpenseClaim = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: claim } = await context.supabase
       .from("expense_claims")

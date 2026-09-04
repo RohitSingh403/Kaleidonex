@@ -41,7 +41,7 @@ export type ApprovalRequestRow = {
 /** Submits a request into the approval pipeline and routes it to the right approver. */
 export const submitApproval = createServerFn({ method: "POST" })
   .middleware([requireStaff])
-  .inputValidator(
+  .validator(
     (input: {
       kind: ApprovalKind;
       resource_table?: string;
@@ -115,7 +115,7 @@ export const listApprovals = createServerFn({ method: "GET" })
 /** Immutable action trail for one request. */
 export const getApprovalHistory = createServerFn({ method: "GET" })
   .middleware([requireStaff])
-  .inputValidator((input: { request_id: string }) => input)
+  .validator((input: { request_id: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("approval_actions")
@@ -132,7 +132,7 @@ export const getApprovalHistory = createServerFn({ method: "GET" })
 /** Approve / reject / request changes / escalate / cancel, with server-side authority checks. */
 export const actOnApproval = createServerFn({ method: "POST" })
   .middleware([requireStaff])
-  .inputValidator((input: { id: string; action: ApprovalAct; comment?: string }) => input)
+  .validator((input: { id: string; action: ApprovalAct; comment?: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: row, error: readErr } = await context.supabase
       .from("approval_requests")
@@ -302,7 +302,7 @@ export const getApprovalRules = createServerFn({ method: "GET" })
 
 export const saveApprovalRule = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       rule_key: string;
       label: string;

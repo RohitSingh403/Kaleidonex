@@ -241,7 +241,7 @@ export const getWorkforceSnapshot = createServerFn({ method: "GET" })
 
 export const getEmployee360 = createServerFn({ method: "GET" })
   .middleware([requireStaff])
-  .inputValidator((input: { user_id: string }) => input)
+  .validator((input: { user_id: string }) => input)
   .handler(async ({ data, context }) => {
     const id = data.user_id;
     const [profile, personal, attendance, leaves, tasks, docs, reviews, salary, corrections] = await Promise.all([
@@ -299,7 +299,7 @@ export const getAttendanceCorrections = createServerFn({ method: "GET" })
 
 export const requestAttendanceCorrection = createServerFn({ method: "POST" })
   .middleware([requireStaff])
-  .inputValidator(
+  .validator(
     (input: {
       work_date: string;
       requested_status: "present" | "absent" | "half_day" | "leave" | "paid_leave" | "holiday";
@@ -340,7 +340,7 @@ export const requestAttendanceCorrection = createServerFn({ method: "POST" })
 
 export const decideAttendanceCorrection = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator((input: { id: string; decision: "approved" | "rejected"; note: string }) => input)
+  .validator((input: { id: string; decision: "approved" | "rejected"; note: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: row, error: readErr } = await context.supabase
       .from("attendance_corrections")
@@ -398,7 +398,7 @@ export const decideAttendanceCorrection = createServerFn({ method: "POST" })
 
 export const recordAuditEvent = createServerFn({ method: "POST" })
   .middleware([requireStaff])
-  .inputValidator(
+  .validator(
     (input: { action: string; target_type?: string; target_id?: string; target_name?: string; details?: string }) => input,
   )
   .handler(async ({ data, context }) => {
@@ -434,7 +434,7 @@ export const getNotifications = createServerFn({ method: "GET" })
 
 export const markNotificationsRead = createServerFn({ method: "POST" })
   .middleware([requireStaff])
-  .inputValidator((input: { ids: string[] }) => input)
+  .validator((input: { ids: string[] }) => input)
   .handler(async ({ data, context }) => {
     if (data.ids.length === 0) return { ok: true };
     const { error } = await context.supabase
@@ -461,7 +461,7 @@ export const getAnnouncements = createServerFn({ method: "GET" })
 
 export const publishAnnouncement = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator(
+  .validator(
     (input: {
       title: string;
       body: string;
@@ -517,7 +517,7 @@ export const publishAnnouncement = createServerFn({ method: "POST" })
  */
 export const sendAttendanceReminders = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator((input: { work_date?: string }) => input)
+  .validator((input: { work_date?: string }) => input)
   .handler(async ({ data, context }) => {
     const day = data.work_date || new Date().toISOString().slice(0, 10);
 
@@ -556,7 +556,7 @@ export const sendAttendanceReminders = createServerFn({ method: "POST" })
 
 export const deleteAnnouncement = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("announcements").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -575,7 +575,7 @@ export const getDepartments = createServerFn({ method: "GET" })
 
 export const upsertDepartment = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator((input: { id?: string; name: string; parent_id: string | null; head_id: string | null }) => input)
+  .validator((input: { id?: string; name: string; parent_id: string | null; head_id: string | null }) => input)
   .handler(async ({ data, context }) => {
     const payload = { name: data.name, parent_id: data.parent_id, head_id: data.head_id };
     const { error } = data.id
@@ -588,7 +588,7 @@ export const upsertDepartment = createServerFn({ method: "POST" })
 
 export const deleteDepartment = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("departments").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -600,7 +600,7 @@ export const deleteDepartment = createServerFn({ method: "POST" })
 
 export const savePerformanceReview = createServerFn({ method: "POST" })
   .middleware([requireManager])
-  .inputValidator(
+  .validator(
     (input: {
       user_id: string;
       period_label: string;
@@ -637,7 +637,7 @@ export const savePerformanceReview = createServerFn({ method: "POST" })
 
 export const setEmployeeStatus = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator((input: { user_id: string; status: "active" | "inactive" }) => input)
+  .validator((input: { user_id: string; status: "active" | "inactive" }) => input)
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
@@ -656,7 +656,7 @@ export const setEmployeeStatus = createServerFn({ method: "POST" })
 
 export const updateEmployeeAssignment = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator(
+  .validator(
     (input: { user_id: string; department: string; designation: string; department_id: string | null }) => input,
   )
   .handler(async ({ data, context }) => {

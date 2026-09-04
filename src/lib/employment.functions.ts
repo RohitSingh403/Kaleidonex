@@ -62,7 +62,7 @@ export const getEmploymentProfile = createServerFn({ method: "GET" })
 
 export const saveEmploymentProfile = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: EmploymentProfileInput) => input)
+  .validator((input: EmploymentProfileInput) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("employee_profile")
@@ -85,7 +85,7 @@ export const getPersonalDetails = createServerFn({ method: "GET" })
 
 export const savePersonalDetails = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: PersonalInput) => input)
+  .validator((input: PersonalInput) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("employee_personal")
@@ -108,7 +108,7 @@ export const getEmployeeDocuments = createServerFn({ method: "GET" })
 
 export const saveEmployeeDocument = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: { doc_type: string; info: string; file_url: string; file_name: string }) => input,
   )
   .handler(async ({ data, context }) => {
@@ -123,7 +123,7 @@ export const saveEmployeeDocument = createServerFn({ method: "POST" })
 
 export const deleteEmployeeDocument = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("employee_documents")

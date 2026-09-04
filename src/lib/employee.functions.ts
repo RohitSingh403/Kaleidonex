@@ -19,7 +19,7 @@ export const getAttendance = createServerFn({ method: "GET" })
 
 export const markAttendance = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       work_date: string;
       status: AttendanceStatus;
@@ -50,7 +50,7 @@ export const getLeaves = createServerFn({ method: "GET" })
 
 export const applyLeave = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       leave_type: string;
       start_date: string;
@@ -109,7 +109,7 @@ export const getEmployeeRequests = createServerFn({ method: "GET" })
 
 export const createEmployeeRequest = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { request_type: string; details: string; note: string }) => input)
+  .validator((input: { request_type: string; details: string; note: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: inserted, error } = await context.supabase
       .from("employee_requests")

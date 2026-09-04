@@ -16,7 +16,7 @@ export const getLeads = createServerFn({ method: "GET" })
 
 export const updateLeadStatus = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string; status: "new" | "contacted" | "closed" }) => input)
+  .validator((input: { id: string; status: "new" | "contacted" | "closed" }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("leads")
@@ -28,7 +28,7 @@ export const updateLeadStatus = createServerFn({ method: "POST" })
 
 export const deleteLead = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("leads").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -50,7 +50,7 @@ export const getProducts = createServerFn({ method: "GET" })
 
 export const upsertProduct = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       id?: string;
       name: string;
@@ -76,7 +76,7 @@ export const upsertProduct = createServerFn({ method: "POST" })
 
 export const deleteProduct = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("products").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -98,7 +98,7 @@ export const getProgrammes = createServerFn({ method: "GET" })
 
 export const upsertProgramme = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       id?: string;
       name: string;
@@ -123,7 +123,7 @@ export const upsertProgramme = createServerFn({ method: "POST" })
 
 export const deleteProgramme = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("programmes").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -145,7 +145,7 @@ export const getSchools = createServerFn({ method: "GET" })
 
 export const upsertSchool = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       id?: string;
       name: string;
@@ -171,7 +171,7 @@ export const upsertSchool = createServerFn({ method: "POST" })
 
 export const deleteSchool = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("schools").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -193,7 +193,7 @@ export const getTeachers = createServerFn({ method: "GET" })
 
 export const upsertTeacher = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       id?: string;
       name: string;
@@ -218,7 +218,7 @@ export const upsertTeacher = createServerFn({ method: "POST" })
 
 export const deleteTeacher = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("teachers").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -275,7 +275,7 @@ export const getUsers = createServerFn({ method: "GET" })
 
 export const setUserRole = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { user_id: string; role: "admin" | "editor"; action: "grant" | "revoke" }) => input)
+  .validator((input: { user_id: string; role: "admin" | "editor"; action: "grant" | "revoke" }) => input)
   .handler(async ({ data, context }) => {
     const { data: isAuth } = await context.supabase
       .rpc("has_role", { _user_id: context.userId, _role: "admin" });

@@ -41,7 +41,7 @@ export const getOrgSettings = createServerFn({ method: "GET" })
 
 export const saveOrgSetting = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator((input: { key: "working_days" | "leave_types" | "notifications"; value: unknown }) => input)
+  .validator((input: { key: "working_days" | "leave_types" | "notifications"; value: unknown }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("org_settings")
@@ -58,7 +58,7 @@ export const saveOrgSetting = createServerFn({ method: "POST" })
 
 export const saveDepartmentBudget = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator((input: { id: string; cost_center: string; budget: number; spent: number }) => input)
+  .validator((input: { id: string; cost_center: string; budget: number; spent: number }) => input)
   .handler(async ({ data, context }) => {
     if (data.budget < 0 || data.spent < 0) throw new Error("Budget values cannot be negative");
     const { error } = await context.supabase
@@ -258,7 +258,7 @@ export const getExecAnalytics = createServerFn({ method: "GET" })
 
 export const deleteStaffAccount = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator((input: { user_id: string; confirm_name: string }) => input)
+  .validator((input: { user_id: string; confirm_name: string }) => input)
   .handler(async ({ data, context }) => {
     if (data.user_id === context.userId) throw new Error("You cannot delete your own account");
 
@@ -356,7 +356,7 @@ export const getBroadcasts = createServerFn({ method: "GET" })
 
 export const publishBroadcast = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator(
+  .validator(
     (input: { title: string; body: string; category: string; notify: boolean }) => {
       const title = input.title.trim();
       const body = input.body.trim();
@@ -415,7 +415,7 @@ export const publishBroadcast = createServerFn({ method: "POST" })
 
 export const setBroadcastPublished = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator((input: { id: string; published: boolean }) => input)
+  .validator((input: { id: string; published: boolean }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("announcements")
@@ -427,7 +427,7 @@ export const setBroadcastPublished = createServerFn({ method: "POST" })
 
 export const deleteBroadcast = createServerFn({ method: "POST" })
   .middleware([requireSuperAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("announcements").delete().eq("id", data.id);
     if (error) throw new Error(error.message);

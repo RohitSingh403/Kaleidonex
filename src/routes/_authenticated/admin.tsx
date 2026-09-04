@@ -91,6 +91,8 @@ import { OrgControlSection, type OrgControlTab } from "@/components/admin/org-co
 import { BroadcastSection } from "@/components/admin/broadcast-section";
 import { MyRequestsSection } from "@/components/admin/my-requests-section";
 import { NotificationsSection } from "@/components/admin/notifications-section";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
+
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -312,9 +314,9 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="flex min-h-screen bg-muted/40">
+    <div className="flex h-screen overflow-hidden bg-muted/40">
       {/* Dark icon rail */}
-      <div className="hidden w-14 shrink-0 flex-col items-center gap-6 bg-ink py-4 text-ink-foreground md:flex">
+      <div className="hidden w-14 shrink-0 h-screen sticky top-0 flex-col items-center gap-6 bg-ink py-4 text-ink-foreground md:flex z-30 select-none">
         <Link
           to="/"
           className="grid h-9 w-9 place-items-center rounded-lg bg-accent font-display text-lg font-bold text-accent-foreground"
@@ -349,57 +351,23 @@ function AdminDashboard() {
         >
           <Settings className="h-5 w-5" />
         </button>
-
       </div>
 
-      {/* Working menu */}
+      {/* Dedicated Admin Sidebar Component */}
       {!menuOpen && (
-        <aside className="hidden w-56 shrink-0 flex-col border-r border-border bg-card md:flex">
-          <div className="px-5 py-5">
-            <Link to="/" className="font-display text-2xl font-bold tracking-tight">
-              <span className="text-accent">K</span>aleido<span className="text-accent">n</span>ex
-            </Link>
-          </div>
-          <div className="px-5">
-            <p className="text-sm font-semibold text-accent">
-              {scope === "ceo" ? "CEO Console" : scope === "hr" ? "HR Console" : "Working Menu"}
-            </p>
-            <div className="mt-3 h-px bg-border" />
-          </div>
-          <nav className="flex-1 space-y-4 p-3">
-            {groups.map((g) => (
-              <div key={g.title} className="space-y-1">
-                <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {g.title}
-                </p>
-                {g.items.map((id) => {
-                  const t = tabs.find((x) => x.id === id);
-                  if (!t) return null;
-                  return (
-                    <button
-                      key={t.id}
-                      onClick={() => setTab(t.id)}
-                      className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                        tab === t.id
-                          ? "bg-secondary font-semibold text-primary"
-                          : "text-foreground/70 hover:bg-secondary/60 hover:text-foreground"
-                      }`}
-                    >
-                      <t.icon className={`h-4 w-4 ${tab === t.id ? "text-accent" : "text-accent/70"}`} />
-                      {labelFor(t)}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-          </nav>
-
-        </aside>
+        <AdminSidebar
+          scope={scope}
+          currentTab={tab}
+          onSelectTab={(id) => setTab(id as Tab)}
+          groups={groups}
+          tabs={tabs}
+          labelFor={labelFor}
+        />
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col h-screen overflow-y-auto">
         {/* Top bar */}
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-3 py-3 sm:px-4">
+        <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card/95 backdrop-blur px-3 py-3 sm:px-4 shrink-0">
           <select
             value={tab}
             onChange={(e) => setTab(e.target.value as Tab)}

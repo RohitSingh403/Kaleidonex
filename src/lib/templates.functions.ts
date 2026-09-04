@@ -37,7 +37,7 @@ export const getTemplates = createServerFn({ method: "GET" })
 
 export const upsertTemplate = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       id?: string;
       title: string;
@@ -70,7 +70,7 @@ export const upsertTemplate = createServerFn({ method: "POST" })
 
 export const duplicateTemplate = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("templates")
@@ -95,7 +95,7 @@ export const duplicateTemplate = createServerFn({ method: "POST" })
 
 export const deleteTemplate = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("templates").delete().eq("id", data.id);
     if (error) throw new Error(error.message);

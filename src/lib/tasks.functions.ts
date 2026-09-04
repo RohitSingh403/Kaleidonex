@@ -37,7 +37,7 @@ export const getTasks = createServerFn({ method: "GET" })
 
 export const createTask = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: {
       title: string;
       description: string;
@@ -56,7 +56,7 @@ export const createTask = createServerFn({ method: "POST" })
 
 export const updateTaskStatus = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: { id: string; status: TaskStatus; progress?: number }) => input,
   )
   .handler(async ({ data, context }) => {
@@ -73,7 +73,7 @@ export const updateTaskStatus = createServerFn({ method: "POST" })
 
 export const deleteTask = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((input: { id: string }) => input)
+  .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("tasks").delete().eq("id", data.id);
     if (error) throw new Error(error.message);

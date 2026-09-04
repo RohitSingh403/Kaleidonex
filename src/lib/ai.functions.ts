@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/require-admin";
 
 export const generateTeachingContent = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator(
+  .validator(
     (input: { kind: string; grade: string; subject: string; topic: string }) => input,
   )
   .handler(async ({ data }) => {

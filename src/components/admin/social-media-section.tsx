@@ -24,7 +24,7 @@ const CATEGORIES: Category[] = [
       { id: "ab1", title: "Atma Nirbhar Bharat", tier: "Free", tone: "from-accent to-primary" },
       { id: "ab2", title: "A Self-Reliant India", tier: "Free", tone: "from-primary to-accent" },
       { id: "ab3", title: "Made in India", tier: "Free", tone: "from-muted to-secondary" },
-      { id: "ab4", title: "Harnessing Capabilities", tier: "Free", tone: "from-destructive to-accent" },
+      { id: "ab4", title: "National Innovation", tier: "Free", tone: "from-destructive to-accent" },
     ],
   },
   {

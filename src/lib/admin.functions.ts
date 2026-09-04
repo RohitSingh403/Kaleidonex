@@ -37,6 +37,18 @@ export const deleteLead = createServerFn({ method: "POST" })
 
 // ─── Products ────────────────────────────────────────────
 
+export const getPublicProducts = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("published", true)
+      .order("sort_order", { ascending: true });
+    if (error) return [];
+    return data ?? [];
+  });
+
 export const getProducts = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }) => {

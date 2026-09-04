@@ -1,9 +1,13 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { createFileRoute, useNavigate, Link, redirect } from "@tanstack/react-router";
+import { useEffect, useState, type FormEvent } from "react";
 import { Building2, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { getSupabase, BACKEND_UNAVAILABLE } from "@/lib/supabase-optional";
 
+const DENIED = "Access denied. This portal is restricted to Kaleidonex staff accounts.";
+const STAFF_ROLES = ["admin", "ceo", "hr", "employee"];
+
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Login — Kaleidonex CRM Portal" },
@@ -12,11 +16,23 @@ export const Route = createFileRoute("/auth")({
       { property: "og:description", content: "Restricted sign in for Kaleidonex administrators." },
     ],
   }),
+  beforeLoad: async () => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) {
+      const { data: roleRows } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id);
+      const roles = (roleRows ?? []).map((r) => r.role as string);
+      if (roles.some((r) => STAFF_ROLES.includes(r))) {
+        throw redirect({ to: "/admin" });
+      }
+    }
+  },
   component: AuthPage,
 });
-
-const DENIED = "Access denied. This portal is restricted to Kaleidonex staff accounts.";
-const STAFF_ROLES = ["admin", "ceo", "hr", "employee"];
 
 function requireClient() {
   const client = getSupabase();
@@ -33,6 +49,25 @@ function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .then(({ data: roleRows }) => {
+            const roles = (roleRows ?? []).map((r) => r.role as string);
+            if (roles.some((r) => STAFF_ROLES.includes(r))) {
+              navigate({ to: "/admin", replace: true });
+            }
+          });
+      }
+    });
+  }, [navigate]);
 
   async function ensureStaffOrDeny() {
     const supabase = requireClient();

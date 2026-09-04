@@ -60,7 +60,7 @@ const TABS: { id: ExecTab; label: string }[] = [
   { id: "audit", label: "Audit Logs" },
 ];
 
-export function ExecDashboard({ initialTab = "dashboard" }: { initialTab?: ExecTab }) {
+export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: { initialTab?: ExecTab; showTabBar?: boolean }) {
   const [tab, setTab] = useState<ExecTab>(initialTab);
   const [open, setOpen] = useState<{ id: string; name: string } | null>(null);
   const [drill, setDrill] = useState<{ department?: string | undefined; hr?: string | undefined }>({});
@@ -157,15 +157,17 @@ export function ExecDashboard({ initialTab = "dashboard" }: { initialTab?: ExecT
 
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border border-border bg-gradient-to-r from-primary/10 via-card to-card p-5 shadow-soft">
-        <p className="text-[11px] uppercase tracking-wide text-accent">Command center</p>
-        <h1 className="mt-1 text-xl font-bold sm:text-2xl">What is happening across the company</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Organisation-wide workforce, attendance, delivery and governance — with drill-down from company to employee.
-        </p>
-      </div>
+      {tab === "dashboard" && (
+        <div className="rounded-xl border border-border bg-gradient-to-r from-primary/10 via-card to-card p-5 shadow-soft">
+          <p className="text-[11px] uppercase tracking-wide text-accent">Command center</p>
+          <h1 className="mt-1 text-xl font-bold sm:text-2xl">What is happening across the company</h1>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+            Organisation-wide workforce, attendance, delivery and governance — with drill-down from company to employee.
+          </p>
+        </div>
+      )}
 
-      <TabBar tabs={TABS} value={tab} onChange={setTab} />
+      {showTabBar && <TabBar tabs={TABS} value={tab} onChange={setTab} />}
       {msg ? <p className="text-xs text-muted-foreground">{msg}</p> : null}
 
       {tab === "dashboard" ? (

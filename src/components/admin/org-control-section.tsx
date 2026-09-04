@@ -42,11 +42,17 @@ const TABS: { id: OrgControlTab; label: string }[] = [
 
 const money = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
 
-export function OrgControlSection({ initialTab = "analytics" }: { initialTab?: OrgControlTab }) {
+export function OrgControlSection({
+  initialTab = "analytics",
+  showTabBar = false,
+}: {
+  initialTab?: OrgControlTab;
+  showTabBar?: boolean;
+}) {
   const [tab, setTab] = useState<OrgControlTab>(initialTab);
   return (
     <div className="space-y-4">
-      <TabBar tabs={TABS} value={tab} onChange={setTab} />
+      {showTabBar && <TabBar tabs={TABS} value={tab} onChange={setTab} />}
       {tab === "analytics" ? <AnalyticsTab /> : null}
       {tab === "budgets" ? <BudgetsTab /> : null}
       {tab === "settings" ? <SettingsTab /> : null}

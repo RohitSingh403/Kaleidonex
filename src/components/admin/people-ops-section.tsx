@@ -46,7 +46,13 @@ const TABS: { id: PeopleOpsTab; label: string }[] = [
   { id: "reviews", label: "Reviews & 1:1" },
 ];
 
-export function PeopleOpsSection({ initialTab = "analytics" }: { initialTab?: PeopleOpsTab }) {
+export function PeopleOpsSection({
+  initialTab = "analytics",
+  showTabBar = false,
+}: {
+  initialTab?: PeopleOpsTab;
+  showTabBar?: boolean;
+}) {
   const [tab, setTab] = useState<PeopleOpsTab>(initialTab);
   const fetchTeam = useServerFn(getTeamMembers);
   const team = useQuery({ queryKey: ["team-members"], queryFn: () => fetchTeam({}) });
@@ -57,7 +63,7 @@ export function PeopleOpsSection({ initialTab = "analytics" }: { initialTab?: Pe
 
   return (
     <div className="space-y-4">
-      <TabBar tabs={TABS} value={tab} onChange={setTab} />
+      {showTabBar && <TabBar tabs={TABS} value={tab} onChange={setTab} />}
       {tab === "analytics" ? <AnalyticsTab /> : null}
       {tab === "bulk" ? <BulkAttendanceTab /> : null}
       {tab === "onboarding" ? <OnboardingTab people={people} /> : null}

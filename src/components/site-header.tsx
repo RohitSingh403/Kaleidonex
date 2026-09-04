@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { LayoutDashboard } from "lucide-react";
+import { getSupabase } from "@/lib/supabase-optional";
 
 const nav = [
   { to: "/", label: "Home" },
@@ -14,6 +16,24 @@ const nav = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session?.user);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur">
@@ -49,12 +69,22 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Link
-            to="/auth"
-            className="btn-press rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          >
-            Login
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              to="/admin"
+              className="inline-flex items-center gap-2 rounded-md bg-accent/15 border border-accent/30 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/25 transition-colors shadow-xs"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              className="btn-press rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            >
+              Login
+            </Link>
+          )}
           <Link
             to="/demo"
             className="btn-shimmer inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-soft"
@@ -62,7 +92,6 @@ export function SiteHeader() {
             Request a demo
           </Link>
         </div>
-
 
         <button
           type="button"
@@ -77,7 +106,7 @@ export function SiteHeader() {
       {open ? (
         <div className="border-t border-border lg:hidden">
           <nav className="mx-auto grid max-w-7xl gap-1 px-4 py-3">
-            {[...nav, { to: "/auth", label: "Login" } as const, { to: "/demo", label: "Request a demo" } as const].map((item) => (
+            {nav.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -87,6 +116,31 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            {isAuthenticated ? (
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-md bg-accent/10 px-3 py-2 text-sm font-semibold text-accent hover:bg-accent/20"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                to="/auth"
+                onClick={() => setOpen(false)}
+                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+              >
+                Login
+              </Link>
+            )}
+            <Link
+              to="/demo"
+              onClick={() => setOpen(false)}
+              className="rounded-md px-3 py-2 text-sm font-medium text-primary hover:bg-secondary"
+            >
+              Request a demo
+            </Link>
           </nav>
         </div>
       ) : null}

@@ -14,6 +14,7 @@ import {
   type EmploymentProfileInput,
   type PersonalInput,
 } from "@/lib/employment.functions";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 type Tab = "status" | "personal" | "documents";
 
@@ -218,7 +219,7 @@ function ProfileStatusTab() {
                 e.preventDefault();
                 mutation.mutate(form);
               }}
-              className="grid gap-3 sm:grid-cols-2"
+              className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
             >
               <Field label="Full Name">
                 <input
@@ -256,39 +257,30 @@ function ProfileStatusTab() {
                 />
               </Field>
               <Field label="Employment Type">
-                <select
-                  className={`${inputCls} ${!isManagement ? "bg-muted/40 cursor-not-allowed text-muted-foreground" : ""}`}
+                <CustomSelect
                   disabled={!isManagement}
                   value={form.employment_type}
-                  onChange={(e) => isManagement && setForm({ ...form, employment_type: e.target.value })}
-                >
-                  {["Full-Time", "Part-Time", "Intern", "Contract"].map((o) => (
-                    <option key={o}>{o}</option>
-                  ))}
-                </select>
+                  onValueChange={(val) => isManagement && setForm({ ...form, employment_type: val })}
+                  options={["Full-Time", "Part-Time", "Intern", "Contract"].map((o) => ({ value: o, label: o }))}
+                  triggerClassName={!isManagement ? "bg-muted/40 cursor-not-allowed text-muted-foreground w-full" : "w-full"}
+                />
               </Field>
               <Field label="Work Mode">
-                <select
-                  className={inputCls}
+                <CustomSelect
                   value={form.work_mode}
-                  onChange={(e) => setForm({ ...form, work_mode: e.target.value })}
-                >
-                  {["Onsite", "Hybrid", "Remote"].map((o) => (
-                    <option key={o}>{o}</option>
-                  ))}
-                </select>
+                  onValueChange={(val) => setForm({ ...form, work_mode: val })}
+                  options={["Onsite", "Hybrid", "Remote"].map((o) => ({ value: o, label: o }))}
+                  triggerClassName="w-full"
+                />
               </Field>
               <Field label="Status">
-                <select
-                  className={`${inputCls} ${!isManagement ? "bg-muted/40 cursor-not-allowed text-muted-foreground" : ""}`}
+                <CustomSelect
                   disabled={!isManagement}
                   value={form.status}
-                  onChange={(e) => isManagement && setForm({ ...form, status: e.target.value })}
-                >
-                  {["Active", "Probation", "Notice Period", "Inactive"].map((o) => (
-                    <option key={o}>{o}</option>
-                  ))}
-                </select>
+                  onValueChange={(val) => isManagement && setForm({ ...form, status: val })}
+                  options={["Active", "Probation", "Notice Period", "Inactive"].map((o) => ({ value: o, label: o }))}
+                  triggerClassName={!isManagement ? "bg-muted/40 cursor-not-allowed text-muted-foreground w-full" : "w-full"}
+                />
               </Field>
               <Field label="Salary (₹)">
                 {isManagement ? (
@@ -559,36 +551,41 @@ function PersonalTab() {
           />
         </Field>
         <Field label="Gender *">
-          <select className={inputCls} value={form.gender} onChange={(e) => set("gender", e.target.value)}>
-            <option value="">Select</option>
-            {["Male", "Female", "Other"].map((o) => (
-              <option key={o}>{o}</option>
-            ))}
-          </select>
+          <CustomSelect
+            value={form.gender || ""}
+            onValueChange={(val) => set("gender", val)}
+            options={[
+              { value: "", label: "Select Gender" },
+              { value: "Male", label: "Male" },
+              { value: "Female", label: "Female" },
+              { value: "Other", label: "Other" },
+            ]}
+            triggerClassName="w-full"
+          />
         </Field>
         <Field label="Blood Group">
-          <select
-            className={inputCls}
-            value={form.blood_group}
-            onChange={(e) => set("blood_group", e.target.value)}
-          >
-            <option value="">Select</option>
-            {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((o) => (
-              <option key={o}>{o}</option>
-            ))}
-          </select>
+          <CustomSelect
+            value={form.blood_group || ""}
+            onValueChange={(val) => set("blood_group", val)}
+            options={[
+              { value: "", label: "Select Blood Group" },
+              ...["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((o) => ({ value: o, label: o })),
+            ]}
+            triggerClassName="w-full"
+          />
         </Field>
         <Field label="Marital Status *">
-          <select
-            className={inputCls}
-            value={form.marital_status}
-            onChange={(e) => set("marital_status", e.target.value)}
-          >
-            <option value="">Select</option>
-            {["Single", "Married", "Other"].map((o) => (
-              <option key={o}>{o}</option>
-            ))}
-          </select>
+          <CustomSelect
+            value={form.marital_status || ""}
+            onValueChange={(val) => set("marital_status", val)}
+            options={[
+              { value: "", label: "Select Marital Status" },
+              { value: "Single", label: "Single" },
+              { value: "Married", label: "Married" },
+              { value: "Other", label: "Other" },
+            ]}
+            triggerClassName="w-full"
+          />
         </Field>
         <Field label="Contact Number *">
           <input
@@ -618,7 +615,7 @@ function PersonalTab() {
 
       <div>
         <h3 className="mb-2 text-sm font-semibold">Current Address *</h3>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="Street">
             <input className={inputCls} value={form.cur_street} onChange={(e) => set("cur_street", e.target.value)} />
           </Field>
@@ -642,7 +639,7 @@ function PersonalTab() {
             Same as Current
           </label>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="Street">
             <input className={inputCls} value={form.perm_street} onChange={(e) => set("perm_street", e.target.value)} />
           </Field>
@@ -664,7 +661,7 @@ function PersonalTab() {
 
       <div>
         <h3 className="mb-2 text-sm font-semibold">Emergency Contact *</h3>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="Name*">
             <input
               className={inputCls}
@@ -698,7 +695,7 @@ function PersonalTab() {
 
       <div>
         <h3 className="mb-2 text-sm font-semibold">Bank Details *</h3>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <Field label="Account Holder Name*">
             <input
               className={inputCls}

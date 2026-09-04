@@ -13,6 +13,7 @@ import {
   statusLabels,
   statusDotColors,
 } from "./types";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function AttendanceWorkspace() {
   const [view, setView] = useState<"mark" | "monthly">("mark");
@@ -298,34 +299,25 @@ export function MonthlyAttendance() {
               {months[month]} {year}
             </span>
             <button onClick={() => shift(1)} className="rounded-md border border-input px-2 py-1 text-sm">›</button>
-            <select
+            <CustomSelect
               value={month}
-              onChange={(e) => setMonth(Number(e.target.value))}
-              className="rounded-md border border-input bg-background px-2 py-1 text-sm"
-            >
-              {months.map((m, i) => (
-                <option key={m} value={i}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <select
+              onValueChange={(val) => setMonth(Number(val))}
+              options={months.map((m, i) => ({ value: i, label: m }))}
+            />
+            <CustomSelect
               value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
-              className="rounded-md border border-input bg-background px-2 py-1 text-sm"
-            >
-              {[now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
+              onValueChange={(val) => setYear(Number(val))}
+              options={[now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].map((y) => ({
+                value: y,
+                label: String(y),
+              }))}
+            />
             <button
               onClick={() => {
                 setMonth(now.getMonth());
                 setYear(now.getFullYear());
               }}
-              className="rounded-md bg-ink px-3 py-1.5 text-xs font-semibold text-ink-foreground"
+              className="rounded-md bg-ink px-3 py-2 text-xs font-semibold text-ink-foreground hover:opacity-90 cursor-pointer"
             >
               Current Month
             </button>

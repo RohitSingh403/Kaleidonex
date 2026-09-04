@@ -22,6 +22,7 @@ import {
   type PayrollEmployeeItem,
 } from "@/lib/payroll.functions";
 import { months, inr } from "./my-panel/types";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function PayrollSection() {
   const now = new Date();
@@ -166,28 +167,16 @@ export function PayrollSection() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <select
+          <CustomSelect
             value={month}
-            onChange={(e) => setMonth(Number(e.target.value))}
-            className="rounded-lg border border-input bg-card px-3 py-2 text-sm font-medium shadow-xs"
-          >
-            {months.map((m, idx) => (
-              <option key={m} value={idx + 1}>
-                {m}
-              </option>
-            ))}
-          </select>
-          <select
+            onValueChange={(val) => setMonth(Number(val))}
+            options={months.map((m, idx) => ({ value: idx + 1, label: m }))}
+          />
+          <CustomSelect
             value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            className="rounded-lg border border-input bg-card px-3 py-2 text-sm font-medium shadow-xs"
-          >
-            {[year - 1, year, year + 1].map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
+            onValueChange={(val) => setYear(Number(val))}
+            options={[year - 1, year, year + 1].map((y) => ({ value: y, label: String(y) }))}
+          />
 
           <button
             onClick={() => queryClient.invalidateQueries({ queryKey: ["payroll-workspace"] })}

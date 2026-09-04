@@ -5,6 +5,7 @@ import { XCircle } from "lucide-react";
 import { getEmployeeRequests, createEmployeeRequest } from "@/lib/employee.functions";
 import type { RequestRow } from "./types";
 import { Card, Pill, Th, Td } from "./ui";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function RequestsTab() {
   const queryClient = useQueryClient();
@@ -26,18 +27,18 @@ export function RequestsTab() {
 
   async function submit() {
     if (!form.details.trim()) {
-      setError("Please add request details.");
+      setError("Please describe your request");
       return;
     }
     setError("");
     setSaving(true);
     try {
-      await create({ data: { ...form, details: form.details.trim() } });
-      await queryClient.invalidateQueries({ queryKey: ["emp-requests"] });
+      await create({ data: form });
       setForm({ request_type: "Salary Query", details: "", note: "" });
       setOpen(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not create request.");
+      queryClient.invalidateQueries({ queryKey: ["emp-requests"] });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to submit request");
     } finally {
       setSaving(false);
     }
@@ -48,19 +49,16 @@ export function RequestsTab() {
       <Card
         title="My requests"
         action={
-          <div className="flex items-center gap-2">
-            <span className="rounded bg-sky-500/15 px-2 py-0.5 text-[11px] font-semibold text-sky-700">
-              Remaining: {Math.max(0, 5 - rows.length)}
-            </span>
+          <div className="flex gap-2">
             <button
               onClick={() => setOpen((v) => !v)}
-              className="rounded-md bg-ink px-3 py-1.5 text-xs font-semibold text-ink-foreground"
+              className="rounded-md bg-ink px-3 py-1.5 text-xs font-semibold text-ink-foreground hover:opacity-90 cursor-pointer"
             >
-              {open ? "Close" : "New Request"}
+              {open ? "Close" : "+ New Request"}
             </button>
             <button
               onClick={() => queryClient.invalidateQueries({ queryKey: ["emp-requests"] })}
-              className="rounded-md border border-input px-3 py-1.5 text-xs"
+              className="rounded-md border border-input px-3 py-1.5 text-xs hover:bg-secondary cursor-pointer"
             >
               Refresh
             </button>
@@ -70,36 +68,36 @@ export function RequestsTab() {
         <div className="flex flex-wrap items-end gap-3">
           <div>
             <label className="text-xs font-medium text-muted-foreground">Request Type</label>
-            <select
+            <CustomSelect
               value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="mt-1 block rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="all">All Types</option>
-              {["Salary Query", "Attendance", "Document", "Other"].map((t) => (
-                <option key={t}>{t}</option>
-              ))}
-            </select>
+              onValueChange={setType}
+              triggerClassName="mt-1"
+              options={[
+                { value: "all", label: "All Types" },
+                ...["Salary Query", "Attendance", "Document", "Other"].map((t) => ({ value: t, label: t })),
+              ]}
+            />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground">Status</label>
-            <select
+            <CustomSelect
               value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="mt-1 block rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-            </select>
+              onValueChange={setStatus}
+              triggerClassName="mt-1"
+              options={[
+                { value: "all", label: "All Status" },
+                { value: "pending", label: "Pending" },
+                { value: "approved", label: "Approved" },
+                { value: "rejected", label: "Rejected" },
+              ]}
+            />
           </div>
           <button
             onClick={() => {
               setType("all");
               setStatus("all");
             }}
-            className="rounded-md border border-input px-4 py-2 text-sm"
+            className="rounded-md border border-input px-4 py-2 text-sm hover:bg-secondary cursor-pointer"
           >
             Reset
           </button>
@@ -108,32 +106,30 @@ export function RequestsTab() {
 
       {open && (
         <Card title="New request">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <label className="text-xs font-medium text-muted-foreground">Type</label>
-              <select
+              <CustomSelect
                 value={form.request_type}
-                onChange={(e) => setForm({ ...form, request_type: e.target.value })}
-                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                {["Salary Query", "Attendance", "Document", "Other"].map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
+                onValueChange={(val) => setForm({ ...form, request_type: val })}
+                triggerClassName="mt-1 w-full"
+                options={["Salary Query", "Attendance", "Document", "Other"].map((t) => ({ value: t, label: t }))}
+              />
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground">Details</label>
               <input
                 value={form.details}
+                placeholder="Details of request"
                 onChange={(e) => setForm({ ...form, details: e.target.value })}
                 className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>
-            <div className="sm:col-span-2">
-              <label className="text-xs font-medium text-muted-foreground">Note</label>
-              <textarea
-                rows={3}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Note (Optional)</label>
+              <input
                 value={form.note}
+                placeholder="Additional note"
                 onChange={(e) => setForm({ ...form, note: e.target.value })}
                 className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
@@ -144,7 +140,7 @@ export function RequestsTab() {
             <button
               onClick={submit}
               disabled={saving}
-              className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-ink-foreground disabled:opacity-60"
+              className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-ink-foreground disabled:opacity-60 cursor-pointer hover:opacity-90"
             >
               {saving ? "Submitting…" : "Submit Request"}
             </button>

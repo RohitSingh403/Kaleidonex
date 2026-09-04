@@ -55,21 +55,34 @@ export function MyProfileSection({
   initialTab = "profile",
   userEmail,
   userName,
+  isManagement = false,
 }: {
   initialTab?: ProfileTab;
   userEmail?: string | undefined;
   userName?: string | undefined;
+  isManagement?: boolean;
 }) {
-  const [tab, setTab] = useState<ProfileTab>(initialTab);
+  const visibleTabs = useMemo(() => {
+    return TABS.filter((t) => (t.id === "business" ? isManagement : true));
+  }, [isManagement]);
+
+  const [tab, setTab] = useState<ProfileTab>(() => {
+    if (initialTab === "business" && !isManagement) return "profile";
+    return initialTab;
+  });
 
   useEffect(() => {
-    setTab(initialTab);
-  }, [initialTab]);
+    if (initialTab === "business" && !isManagement) {
+      setTab("profile");
+    } else {
+      setTab(initialTab);
+    }
+  }, [initialTab, isManagement]);
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-4 border-b border-border sm:gap-6">
-        {TABS.map((t) => (
+        {visibleTabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
@@ -88,7 +101,7 @@ export function MyProfileSection({
       {tab === "sop" && <SopTab />}
       {tab === "profile" && <ProfileTab userEmail={userEmail} userName={userName} />}
       {tab === "security" && <SecurityTab />}
-      {tab === "business" && <BusinessTab />}
+      {tab === "business" && isManagement && <BusinessTab />}
     </div>
   );
 }

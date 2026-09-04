@@ -8,6 +8,7 @@ import {
   deleteExpenseClaim,
 } from "@/lib/claims.functions";
 import { getMyAccess } from "@/lib/team.functions";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 type SubTab = "dashboard" | "mine" | "apply";
 
@@ -265,18 +266,18 @@ function MyClaims({ onNew }: { onNew: () => void }) {
       title="My expense claims"
       action={
         <div className="flex items-center gap-2">
-          <select
+          <CustomSelect
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="rounded-md border border-input bg-background px-3 py-1.5 text-xs"
-          >
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="paid">Paid</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          <button onClick={onNew} className="rounded-md bg-ink px-4 py-1.5 text-xs font-semibold text-ink-foreground">
+            onValueChange={setStatus}
+            options={[
+              { value: "", label: "All Status" },
+              { value: "pending", label: "Pending" },
+              { value: "approved", label: "Approved" },
+              { value: "paid", label: "Paid" },
+              { value: "rejected", label: "Rejected" },
+            ]}
+          />
+          <button onClick={onNew} className="rounded-md bg-ink px-4 py-2 text-xs font-semibold text-ink-foreground hover:opacity-90 cursor-pointer">
             New Claim
           </button>
         </div>
@@ -468,7 +469,7 @@ function ApplyClaim({ onDone }: { onDone: () => void }) {
 
   return (
     <Card title="Create new expense claim">
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <label className="block text-sm">
           <span className="mb-1 block font-medium">
             Expense Date <span className="text-destructive">*</span>
@@ -480,18 +481,17 @@ function ApplyClaim({ onDone }: { onDone: () => void }) {
             onChange={(e) => setForm({ ...form, expense_date: e.target.value })}
           />
         </label>
-        <label className="block text-sm">
+        <div className="block text-sm">
           <span className="mb-1 block font-medium">
             Category <span className="text-destructive">*</span>
           </span>
-          <select className={inputClass} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </label>
+          <CustomSelect
+            value={form.category}
+            onValueChange={(val) => setForm({ ...form, category: val })}
+            options={categories.map((c) => ({ value: c, label: c }))}
+            triggerClassName="w-full"
+          />
+        </div>
         <label className="block text-sm">
           <span className="mb-1 block font-medium">
             Purpose <span className="text-destructive">*</span>
@@ -516,7 +516,7 @@ function ApplyClaim({ onDone }: { onDone: () => void }) {
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
           />
         </label>
-        <label className="block text-sm md:col-span-2">
+        <label className="block text-sm lg:col-span-4">
           <span className="mb-1 block font-medium">Upload Proofs</span>
           <textarea
             rows={3}

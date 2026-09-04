@@ -5,6 +5,7 @@ import { CalendarDays } from "lucide-react";
 import { getLeaves, applyLeave } from "@/lib/employee.functions";
 import { type LeaveRow, months } from "./types";
 import { Card, StatCard, Pill, Th, Td, downloadCsv } from "./ui";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function LeaveTab() {
   const queryClient = useQueryClient();
@@ -89,25 +90,14 @@ export function LeaveTab() {
 
       {open && (
         <Card title="Apply for leave">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label className="text-xs font-medium text-muted-foreground">Leave Type</label>
-              <select
+              <CustomSelect
                 value={form.leave_type}
-                onChange={(e) => setForm({ ...form, leave_type: e.target.value })}
-                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                {["Casual", "Sick", "Earned", "Unpaid"].map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">Reason</label>
-              <input
-                value={form.reason}
-                onChange={(e) => setForm({ ...form, reason: e.target.value })}
-                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                onValueChange={(val) => setForm({ ...form, leave_type: val })}
+                triggerClassName="mt-1 w-full"
+                options={["Casual", "Sick", "Earned", "Unpaid"].map((t) => ({ value: t, label: t }))}
               />
             </div>
             <div>
@@ -128,13 +118,22 @@ export function LeaveTab() {
                 className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Reason</label>
+              <input
+                value={form.reason}
+                placeholder="Reason for leave"
+                onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+            </div>
           </div>
           {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
           <div className="mt-4 flex justify-end">
             <button
               onClick={submit}
               disabled={saving}
-              className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-ink-foreground disabled:opacity-60"
+              className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-ink-foreground disabled:opacity-60 cursor-pointer hover:opacity-90"
             >
               {saving ? "Submitting…" : "Submit Leave"}
             </button>
@@ -144,39 +143,29 @@ export function LeaveTab() {
 
       <Card title="Filters">
         <div className="flex flex-wrap items-center gap-3">
-          <select
+          <CustomSelect
             value={month}
-            onChange={(e) => setMonth(e.target.value === "all" ? "all" : Number(e.target.value))}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            <option value="all">All Months</option>
-            {months.map((m, i) => (
-              <option key={m} value={i + 1}>
-                {m}
-              </option>
-            ))}
-          </select>
-          <select
+            onValueChange={(val) => setMonth(val === "all" ? "all" : Number(val))}
+            options={[
+              { value: "all", label: "All Months" },
+              ...months.map((m, i) => ({ value: i + 1, label: m })),
+            ]}
+          />
+          <CustomSelect
             value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            {[year - 1, year, year + 1].map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-          <select
+            onValueChange={(val) => setYear(Number(val))}
+            options={[year - 1, year, year + 1].map((y) => ({ value: y, label: String(y) }))}
+          />
+          <CustomSelect
             value={filter}
-            onChange={(e) => setFilter(e.target.value as typeof filter)}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
+            onValueChange={(val) => setFilter(val as typeof filter)}
+            options={[
+              { value: "all", label: "All Status" },
+              { value: "pending", label: "Pending" },
+              { value: "approved", label: "Approved" },
+              { value: "rejected", label: "Rejected" },
+            ]}
+          />
           <button
             onClick={() => {
               setMonth("all");

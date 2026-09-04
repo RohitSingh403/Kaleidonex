@@ -5,6 +5,7 @@ import { CalendarOff, Receipt, CalendarCheck, FileText, History } from "lucide-r
 import { getMyRequestHistory, type MyRequestRow } from "@/lib/requests.functions";
 import { getApprovalHistory } from "@/lib/approvals.functions";
 import { Kpi, Panel } from "@/components/admin/workforce-ui";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 const KIND = {
   leave: { label: "Leave", icon: CalendarOff },
@@ -103,18 +104,14 @@ export function MyRequestsSection() {
             {f}
           </button>
         ))}
-        <select
+        <CustomSelect
           value={kind}
-          onChange={(e) => setKind(e.target.value as typeof kind)}
-          className="rounded-full border border-border bg-card px-4 py-1.5 text-sm"
-        >
-          <option value="all">All types</option>
-          {Object.entries(KIND).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v.label}
-            </option>
-          ))}
-        </select>
+          onValueChange={(val) => setKind(val as typeof kind)}
+          options={[
+            { value: "all", label: "All types" },
+            ...Object.entries(KIND).map(([k, v]) => ({ value: k, label: v.label })),
+          ]}
+        />
       </div>
 
       <Panel title="My requests" description="Every leave, claim, correction and request you have raised.">

@@ -23,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CustomSelect } from "@/components/ui/custom-select";
 import {
   getWorkforceSnapshot,
   getAttendanceCorrections,
@@ -251,14 +252,14 @@ export function HrDashboard({ initialTab = "dashboard", showTabBar = false }: { 
                 placeholder="Search employee…"
                 className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm"
               />
-              <select value={dept} onChange={(e) => setDept(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm">
-                <option value="all">All departments</option>
-                {departments.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
+              <CustomSelect
+                value={dept}
+                onValueChange={setDept}
+                options={[
+                  { value: "all", label: "All departments" },
+                  ...departments.map((d) => ({ value: d, label: d })),
+                ]}
+              />
             </div>
           }
         >

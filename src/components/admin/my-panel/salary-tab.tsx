@@ -5,6 +5,7 @@ import { Download, Eye, Printer, X, CheckCircle2, Clock, Building2, FileText, In
 import { getSalaryRecords } from "@/lib/employee.functions";
 import { type SalaryRow, inr, months } from "./types";
 import { Card, StatCard, Pill, Th, Td, downloadCsv } from "./ui";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function SalaryTab() {
   const fetchSalary = useServerFn(getSalaryRecords);
@@ -97,35 +98,25 @@ Generated electronically by Kaleidonex Platform.
         title="Filter salary records"
         action={
           <div className="flex items-center gap-2">
-            <select
+            <CustomSelect
               value={month}
-              onChange={(e) => setMonth(e.target.value === "all" ? "all" : Number(e.target.value))}
-              className="rounded-md border border-input bg-background px-2 py-1 text-sm"
-            >
-              <option value="all">All Months</option>
-              {months.map((m, i) => (
-                <option key={m} value={i + 1}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <select
+              onValueChange={(val) => setMonth(val === "all" ? "all" : Number(val))}
+              options={[
+                { value: "all", label: "All Months" },
+                ...months.map((m, i) => ({ value: i + 1, label: m })),
+              ]}
+            />
+            <CustomSelect
               value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
-              className="rounded-md border border-input bg-background px-2 py-1 text-sm"
-            >
-              {[year - 1, year, year + 1].map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
+              onValueChange={(val) => setYear(Number(val))}
+              options={[year - 1, year, year + 1].map((y) => ({ value: y, label: String(y) }))}
+            />
             <button
               onClick={() => {
                 setMonth("all");
                 setYear(new Date().getFullYear());
               }}
-              className="rounded-md border border-input px-3 py-1 text-sm hover:bg-secondary"
+              className="rounded-md border border-input px-3 py-1.5 text-sm hover:bg-secondary cursor-pointer"
             >
               Clear Filters
             </button>

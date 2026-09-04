@@ -19,6 +19,13 @@ import {
   X,
 } from "lucide-react";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CustomSelect } from "@/components/ui/custom-select";
+import {
   getWorkforceSnapshot,
   getDepartments,
   upsertDepartment,
@@ -42,12 +49,6 @@ import {
   btnPrimary,
   btnGhost,
 } from "@/components/admin/workforce-ui";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { Employee360 } from "@/components/admin/employee-360";
 
@@ -320,30 +321,22 @@ export function ExecDashboard({ initialTab = "dashboard", showTabBar = false }: 
           description="Organisation-wide"
           action={
             <div className="flex flex-wrap gap-2">
-              <select
+              <CustomSelect
                 value={drill.hr ?? ""}
-                onChange={(e) => setDrill((d) => ({ ...d, hr: e.target.value || undefined }))}
-                className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm"
-              >
-                <option value="">All HR units</option>
-                {hrRows.map((h) => (
-                  <option key={h.user_id} value={h.user_id}>
-                    {h.full_name}
-                  </option>
-                ))}
-              </select>
-              <select
+                onValueChange={(val) => setDrill((d) => ({ ...d, hr: val || undefined }))}
+                options={[
+                  { value: "", label: "All HR units" },
+                  ...hrRows.map((h) => ({ value: h.user_id, label: h.full_name })),
+                ]}
+              />
+              <CustomSelect
                 value={drill.department ?? ""}
-                onChange={(e) => setDrill((d) => ({ ...d, department: e.target.value || undefined }))}
-                className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm"
-              >
-                <option value="">All departments</option>
-                {(snap.data?.departmentBreakdown ?? []).map((d) => (
-                  <option key={d.name} value={d.name}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
+                onValueChange={(val) => setDrill((d) => ({ ...d, department: val || undefined }))}
+                options={[
+                  { value: "", label: "All departments" },
+                  ...(snap.data?.departmentBreakdown ?? []).map((d) => ({ value: d.name, label: d.name })),
+                ]}
+              />
             </div>
           }
         >

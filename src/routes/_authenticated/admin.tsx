@@ -40,6 +40,14 @@ import {
   Trash2,
 } from "lucide-react";
 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { StudentsSection } from "@/components/admin/students-section";
 import { ApprovalsSection } from "@/components/admin/approvals-section";
 import { ExpenseClaimSection } from "@/components/admin/expense-claim-section";
@@ -312,7 +320,6 @@ function AdminDashboard() {
 
   const initialTab = (search.tab as Tab) || "overview";
   const [tab, setTabState] = useState<Tab>(initialTab);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [employmentTab, setEmploymentTab] = useState<"status" | "personal" | "documents">("status");
   const [profileTab, setProfileTab] = useState<ProfileTab>("profile");
   const queryClient = useQueryClient();
@@ -387,88 +394,65 @@ function AdminDashboard() {
       <div className="flex min-w-0 flex-1 flex-col h-screen overflow-hidden">
         {/* Top bar */}
         <header className="z-10 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-4 py-3 sm:px-6 shrink-0">
-          <select
-            value={tab}
-            onChange={(e) => setTab(e.target.value as Tab)}
-            className="min-w-0 max-w-[55vw] flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm md:hidden"
-          >
-            {visibleTabs.map((t) => (
-              <option key={t.id} value={t.id}>
-                {labelFor(t)}
-              </option>
-            ))}
-          </select>
+          <div className="min-w-0 max-w-[60vw] md:hidden">
+            <CustomSelect
+              value={tab}
+              onValueChange={(val) => setTab(val as Tab)}
+              options={visibleTabs.map((t) => ({ value: t.id, label: labelFor(t) }))}
+            />
+          </div>
           <div className="hidden md:block" />
           <div className="relative flex min-w-0 items-center gap-2">
             <NotificationBell />
-            <button
-              onClick={() => setProfileOpen((v) => !v)}
-              aria-haspopup="menu"
-              aria-expanded={profileOpen}
-              className="flex min-w-0 items-center gap-2 rounded-full border border-border bg-background px-2 py-1.5 pr-3 transition-colors hover:bg-secondary sm:pr-4"
-            >
-              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold text-primary">
-                {(user?.email ?? "A").slice(0, 1).toUpperCase()}
-              </span>
-              <span className="max-w-[7rem] truncate text-sm font-medium sm:max-w-[12rem]">
-                {(user?.user_metadata?.["full_name"] as string) || user?.email || "Admin"}
-              </span>
-            </button>
-
-            {profileOpen ? (
-              <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <button
-                  aria-hidden
-                  tabIndex={-1}
-                  onClick={() => setProfileOpen(false)}
-                  className="fixed inset-0 z-30 cursor-default"
-                />
-                <div
-                  role="menu"
-                  className="absolute right-0 top-full z-40 mt-2 w-56 overflow-hidden rounded-lg border border-border bg-card py-1 shadow-lift"
+                  className="flex min-w-0 items-center gap-2 rounded-full border border-border bg-background px-2 py-1.5 pr-3 transition-colors hover:bg-secondary sm:pr-4 cursor-pointer focus:outline-none"
                 >
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      setProfileTab("profile");
-                      setTab("profile");
-                      setProfileOpen(false);
-                    }}
-                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-secondary"
-                  >
-                    <UserIcon className="h-4 w-4 text-muted-foreground" /> Profile
-                  </button>
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      setTab("settings");
-                      setProfileOpen(false);
-                    }}
-                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-secondary"
-                  >
-                    <Settings className="h-4 w-4 text-muted-foreground" /> Settings
-                  </button>
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      setEmploymentTab("status");
-                      setTab("employment");
-                      setProfileOpen(false);
-                    }}
-                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-secondary"
-                  >
-                    <BadgeCheck className="h-4 w-4 text-muted-foreground" /> Employment Details
-                  </button>
-                  <button
-                    role="menuitem"
-                    onClick={handleSignOut}
-                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-secondary"
-                  >
-                    <LogOut className="h-4 w-4 text-muted-foreground" /> Sign out
-                  </button>
-                </div>
-              </>
-            ) : null}
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold text-primary">
+                    {(user?.email ?? "A").slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="max-w-[7rem] truncate text-sm font-medium sm:max-w-[12rem]">
+                    {(user?.user_metadata?.["full_name"] as string) || user?.email || "Admin"}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-card border border-border p-1 shadow-lift">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setProfileTab("profile");
+                    setTab("profile");
+                  }}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm cursor-pointer rounded-md hover:bg-secondary transition-colors"
+                >
+                  <UserIcon className="h-4 w-4 text-muted-foreground" /> Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setTab("settings");
+                  }}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm cursor-pointer rounded-md hover:bg-secondary transition-colors"
+                >
+                  <Settings className="h-4 w-4 text-muted-foreground" /> Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setEmploymentTab("status");
+                    setTab("employment");
+                  }}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm cursor-pointer rounded-md hover:bg-secondary transition-colors"
+                >
+                  <BadgeCheck className="h-4 w-4 text-muted-foreground" /> Employment Details
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="my-1 border-t border-border" />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm cursor-pointer rounded-md hover:bg-secondary transition-colors text-destructive"
+                >
+                  <LogOut className="h-4 w-4 text-destructive" /> Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
@@ -543,6 +527,7 @@ function AdminDashboard() {
               initialTab={profileTab}
               userEmail={user?.email}
               userName={(user?.user_metadata?.["full_name"] as string) || undefined}
+              isManagement={routeIsSuper || routeRoles.includes("admin") || routeRoles.includes("ceo")}
             />
           )}
         </main>

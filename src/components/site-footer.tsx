@@ -40,12 +40,12 @@ export function SiteFooter() {
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-wide opacity-70">Talk to us</h3>
           <ul className="mt-4 space-y-2 break-words text-sm opacity-90">
-            <li>partnerships@kaleidonex.example</li>
-            <li>+91 98000 00000</li>
-            <li>Mon–Sat, 9:30am–6:30pm IST</li>
+            <li>kaleidonextechnologies@gmail.com</li>
+            <li>+91 9798243828</li>
+            <li>Mon–Sat, 9:30am–5:30pm IST</li>
           </ul>
         </div>
-      </div>
+      </div> 
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs opacity-70 md:flex-row md:items-center md:justify-between">

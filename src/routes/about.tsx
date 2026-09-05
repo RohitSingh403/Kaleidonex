@@ -58,10 +58,10 @@ function About() {
           <SectionHeading eyebrow="Milestones" title="How we got here" />
           <ol className="mt-10 space-y-5">
             {[
-              ["2016", "First robotics lab installed in a single campus in Pune."],
-              ["2019", "Graded curriculum for grades 1–12 published and NEP-mapped."],
-              ["2022", "AI lab and VR concept library launched across 120 schools."],
-              ["2026", "480 partner schools, in-house kit manufacturing and progress dashboards."],
+              ["2024", "First robotics lab installed in a single campus in Pune."],
+              ["2025", "Graded curriculum for grades 1–12 published and NEP-mapped."],
+              ["2026", "AI lab and VR concept library launched across 120 schools."],
+              // ["2026", "480 partner schools, in-house kit manufacturing and progress dashboards."],
             ].map(([year, text]) => (
               <li key={year} className="flex gap-6 rounded-xl border border-border bg-card p-6">
                 <span className="font-display text-xl font-bold text-primary">{year}</span>

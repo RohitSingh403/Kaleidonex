@@ -151,11 +151,11 @@ function Home() {
                 Explore solutions
               </Link>
             </Reveal>
-            <Reveal delay={360}>
+            {/* <Reveal delay={360}>
               <p className="mt-6 text-sm text-muted-foreground">
                 Trusted by 480+ schools · NEP 2020 aligned · Onboarding in 4–6 weeks
               </p>
-            </Reveal>
+            </Reveal> */}
           </div>
 
           <Reveal delay={200} className="relative">
@@ -172,7 +172,7 @@ function Home() {
         </div>
       </section>
 
-      <Section className="!py-12">
+      {/* <Section className="!py-12">
         <dl className="grid grid-cols-2 gap-6 rounded-2xl border border-border bg-card p-8 shadow-soft md:grid-cols-4">
           {stats.map((s, i) => (
             <Reveal key={s.label} delay={i * 90}>
@@ -183,7 +183,7 @@ function Home() {
             </Reveal>
           ))}
         </dl>
-      </Section>
+      </Section> */}
 
 
       <Section>

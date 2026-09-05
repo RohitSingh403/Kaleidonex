@@ -138,9 +138,9 @@ function Contact() {
 
           <div className="grid gap-5 self-start">
             {[
-              ["Partnerships", "partnerships@kaleidonex.example", "+91 98000 00000"],
-              ["Support", "support@kaleidonex.example", "Mon–Sat, 9:30am–6:30pm IST"],
-              ["Careers", "careers@kaleidonex.example", "Trainers, engineers, programme managers"],
+              ["Partnerships", "partnerships@kaleidonex.com", "+91 97982 43828"],
+              ["Support", "support@kaleidonex.com", "Mon–Sat, 9:30am–5:30pm IST"],
+              ["Careers", "careers@kaleidonex.com", "Trainers, engineers, programme managers"],
             ].map(([title, a, b]) => (
               <div key={title} className="rounded-xl border border-border bg-card p-6 shadow-soft">
                 <h2 className="font-semibold">{title}</h2>
@@ -151,7 +151,7 @@ function Contact() {
             <div className="rounded-xl border border-border bg-secondary/40 p-6">
               <h2 className="font-semibold">Head office</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                4th Floor, Innovation House, Baner Road, Pune 411045, Maharashtra, India
+                Sitapura Industrial Area, Jaipur 302001, Rajasthan, India
               </p>
             </div>
           </div>

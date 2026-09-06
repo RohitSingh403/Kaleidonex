@@ -50,7 +50,13 @@ export function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs opacity-70 md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} Kaleidonex Learning Labs. All rights reserved.</p>
-          <p>Privacy Policy · Terms · Refund Policy</p>
+          <p className="flex flex-wrap items-center gap-x-1 gap-y-1">
+            <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+            <span className="opacity-40">·</span>
+            <Link to="/terms" className="hover:underline">Terms</Link>
+            <span className="opacity-40">·</span>
+            <Link to="/refund" className="hover:underline">Refund Policy</Link>
+          </p>
         </div>
       </div>
     </footer>

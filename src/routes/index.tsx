@@ -28,10 +28,10 @@ export const Route = createFileRoute("/")({
 });
 
 const stats: { value: number; suffix: string; decimals?: number; label: string }[] = [
-  { value: 480, suffix: "+", label: "Partner schools" },
-  { value: 3.2, suffix: "L", decimals: 1, label: "Students taught" },
-  { value: 6500, suffix: "", label: "Teachers trained" },
-  { value: 72, suffix: "", label: "Cities across India" },
+  { value: 5, suffix: "+", label: "Partner schools" },
+  { value: 500, suffix: "+", decimals: 0, label: "Students taught" },
+  { value: 30, suffix: "", label: "Teachers trained" },
+  { value: 3, suffix: "+", label: "Cities across India" },
 ];
 
 
@@ -177,7 +177,7 @@ function Home() {
         </div>
       </section>
 
-      {/* <Section className="!py-12">
+      <Section className="!py-12">
         <dl className="grid grid-cols-2 gap-6 rounded-2xl border border-border bg-card p-8 shadow-soft md:grid-cols-4">
           {stats.map((s, i) => (
             <Reveal key={s.label} delay={i * 90}>
@@ -188,7 +188,7 @@ function Home() {
             </Reveal>
           ))}
         </dl>
-      </Section> */}
+      </Section>
 
 
       <Section>

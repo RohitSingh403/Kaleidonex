@@ -4,16 +4,17 @@ import { Card, CtaBand, PageHero, Section, SectionHeading } from "@/components/u
 export const Route = createFileRoute("/solutions")({
   head: () => ({
     meta: [
-      { title: "Solutions — Coding, Robotics, AI, STEM & VR for Schools" },
+      { title: "Solutions — Coding, Robotics, AI, STEM, AR/VR & Quantum Tech for Schools" },
       {
         name: "description",
         content:
-          "Explore Kaleidonex's school solutions: coding, robotics labs, AI labs, STEM infrastructure, VR learning and entrepreneurship programmes.",
+          "Explore KaleidoNex school solutions: Coding, Robotics, AI, STEM, AR/VR, Quantum Technology and Entrepreneurship programmes delivered as one ecosystem.",
       },
-      { property: "og:title", content: "Kaleidonex Solutions for Schools" },
+      { property: "og:title", content: "KaleidoNex Solutions for Schools" },
       {
         property: "og:description",
-        content: "Coding, robotics, AI, STEM labs, VR and entrepreneurship delivered as one programme.",
+        content:
+          "Coding, Robotics, AI, STEM, AR/VR, Quantum Technology and Entrepreneurship — one delivery team, one programme.",
       },
     ],
   }),
@@ -23,43 +24,49 @@ export const Route = createFileRoute("/solutions")({
 const solutions = [
   {
     name: "Coding",
-    summary: "Progressive computational thinking from blocks to full-stack projects.",
+    summary: "Progressive computational thinking from block coding to full-stack projects, mapped grade by grade.",
     includes: ["Block coding & Scratch", "Python and app building", "Web development", "Coding competitions"],
   },
   {
     name: "Robotics Lab",
-    summary: "A complete lab: benches, kits, sensors, controllers and project library.",
+    summary: "A complete lab ecosystem: benches, kits, sensors, microcontrollers and a competition-ready project library.",
     includes: ["Lab design & installation", "Kits and spares", "Teacher certification", "Competition mentoring"],
   },
   {
     name: "AI Lab",
-    summary: "Data, machine learning and responsible AI, taught through build projects.",
+    summary: "Data literacy, machine learning and responsible AI — taught through hands-on build projects.",
     includes: ["Vision & speech projects", "Datasets and notebooks", "AI ethics modules", "Capstone showcase"],
   },
   {
     name: "STEM Labs",
-    summary: "Cross-subject maker spaces for science, maths and design thinking.",
+    summary: "Cross-subject maker spaces for science, maths and design thinking with full annual maintenance.",
     includes: ["Maker equipment", "Consumables plan", "Activity handbooks", "Annual maintenance"],
   },
   {
-    name: "VR Learning",
-    summary: "Immersive concept experiences that make abstract topics concrete.",
+    name: "AR/VR Learning",
+    summary: "Immersive concept experiences that make abstract topics in science, geography and history concrete.",
     includes: ["Headset kits", "Concept library", "Guided lesson plans", "Class management app"],
   },
   {
+    name: "Quantum Technology",
+    summary: "India-first programme introducing quantum computing concepts to senior school students through projects.",
+    includes: ["Quantum basics & qubits", "Hands-on simulations", "Industry case studies", "Capstone projects"],
+  },
+  {
     name: "Entrepreneurship",
-    summary: "Finance literacy, critical thinking and student-run venture challenges.",
+    summary: "Finance literacy, critical thinking and student-run venture challenges that build real-world mindsets.",
     includes: ["Business basics", "Pitch bootcamps", "Mentor network", "Inter-school demo day"],
   },
 ];
+
 
 function Solutions() {
   return (
     <>
       <PageHero
         eyebrow="Solutions"
-        title="Six programmes, one delivery team"
-        description="Run any track independently or combine them into a full innovation ecosystem across your campus."
+        title="One partner for every future-skills subject"
+        description="Run any track independently or combine them into a full innovation ecosystem across your campus — Coding, AI, Robotics, STEM, AR/VR, Quantum Technology and Entrepreneurship."
       />
 
       <Section>
@@ -91,9 +98,9 @@ function Solutions() {
             title="Delivery you do not have to manage"
           />
           <div className="mt-10 grid gap-5 md:grid-cols-3">
-            <Card title="Dedicated programme manager" description="A single point of contact for scheduling, escalations and reporting." />
-            <Card title="Teacher certification" description="Hands-on training, lesson kits and refresher sessions every term." />
-            <Card title="Progress dashboards" description="Attendance, project completion and skill growth per student and class." />
+            <Card title="Dedicated programme manager" description="A single point of contact for scheduling, classroom execution, escalations and reporting." />
+            <Card title="Teacher certification" description="Hands-on training workshops, lesson kits and refresher sessions every term so your staff own the programme." />
+            <Card title="Progress dashboards" description="Smart tools for assessments, project tracking and student progress monitoring — visible to school leadership." />
           </div>
         </Section>
       </div>

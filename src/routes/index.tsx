@@ -58,13 +58,18 @@ const programs = [
     badge: "Infrastructure",
   },
   {
-    title: "VR Learning",
+    title: "AR/VR Learning",
     description: "Immersive concept libraries for science, geography and history.",
     badge: "Immersive",
   },
   {
+    title: "Quantum Technology",
+    description: "Introducing quantum computing concepts to senior students through hands-on projects.",
+    badge: "Grades 9–12",
+  },
+  {
     title: "Entrepreneurship",
-    description: "Finance, critical thinking and life skills through school ventures.",
+    description: "Finance, critical thinking and life skills through student-run venture challenges.",
     badge: "Life skills",
   },
 ];
@@ -190,7 +195,7 @@ function Home() {
         <SectionHeading
           eyebrow="Programmes"
           title="One partner for every future-skills subject"
-          description="Pick a single track or run the full ecosystem across primary, middle and senior school."
+          description="From Coding and Robotics to AI, STEM, AR/VR, Quantum Technology and Entrepreneurship — pick a single track or run the full ecosystem across your school."
         />
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {programs.map((p, i) => (

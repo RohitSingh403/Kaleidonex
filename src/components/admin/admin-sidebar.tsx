@@ -33,8 +33,15 @@ export function AdminSidebar({
     <aside className="hidden h-screen sticky top-0 w-64 shrink-0 flex-col border-r border-border bg-card md:flex select-none z-20 overflow-hidden">
       {/* Pinned Top Brand Header */}
       <div className="shrink-0 px-5 pt-5 pb-4 border-b border-border/70 bg-card">
-        <Link to="/" className="font-display text-2xl font-bold tracking-tight inline-block hover:opacity-90 transition-opacity">
-          <span className="text-accent">K</span>aleido<span className="text-accent">n</span>ex
+        <Link to="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+          <img
+            src="/nav1.png"
+            alt="Kaleidonex"
+            className="h-8 w-8 object-contain"
+          />
+          <span className="font-display text-xl font-bold tracking-tight">
+            <span className="text-accent">K</span>aleido<span className="text-accent">n</span>ex
+          </span>
         </Link>
         <div className="mt-2.5 flex items-center gap-2">
           <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />

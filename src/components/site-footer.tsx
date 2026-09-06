@@ -5,10 +5,12 @@ export function SiteFooter() {
     <footer className="ink-panel mt-24">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-accent font-display text-lg font-bold text-accent-foreground">
-              K
-            </span>
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/nav1.png"
+              alt="Kaleidonex"
+              className="h-9 w-9 object-contain"
+            />
             <span className="font-display text-lg font-bold">Kaleidonex</span>
           </div>
           <p className="mt-4 max-w-xs text-sm opacity-80">

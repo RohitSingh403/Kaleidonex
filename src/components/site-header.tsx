@@ -47,11 +47,13 @@ export function SiteHeader() {
       </div>
 
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary font-display text-lg font-bold text-primary-foreground">
-            K
-          </span>
-          <span className="font-display text-lg font-bold tracking-tight">Kaleidonex</span>
+        <Link to="/" className="flex items-center gap-2.5">
+          <img
+            src="/nav1.png"
+            alt="Kaleidonex"
+            className="h-12 w-12 object-contain"
+          />
+          <span className="font-display text-xl font-bold tracking-tight">Kaleidonex</span>
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
@@ -69,6 +71,12 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <Link
+            to="/demo"
+            className="btn-shimmer inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-soft"
+          >
+            Book a demo
+          </Link>
           {isAuthenticated ? (
             <Link
               to="/admin"
@@ -85,12 +93,6 @@ export function SiteHeader() {
               Login
             </Link>
           )}
-          <Link
-            to="/demo"
-            className="btn-shimmer inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-soft"
-          >
-            Request a demo
-          </Link>
         </div>
 
         <button
@@ -116,6 +118,13 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              to="/demo"
+              onClick={() => setOpen(false)}
+              className="rounded-md px-3 py-2 text-sm font-semibold text-primary hover:bg-secondary"
+            >
+              Book a demo
+            </Link>
             {isAuthenticated ? (
               <Link
                 to="/admin"
@@ -134,13 +143,6 @@ export function SiteHeader() {
                 Login
               </Link>
             )}
-            <Link
-              to="/demo"
-              onClick={() => setOpen(false)}
-              className="rounded-md px-3 py-2 text-sm font-medium text-primary hover:bg-secondary"
-            >
-              Request a demo
-            </Link>
           </nav>
         </div>
       ) : null}

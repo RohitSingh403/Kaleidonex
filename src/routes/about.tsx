@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Card, CtaBand, PageHero, Section, SectionHeading } from "@/components/ui-kit";
+import { Card, CtaBand, Section, SectionHeading, Eyebrow } from "@/components/ui-kit";
+import { Reveal } from "@/components/reveal";
+import ceoImage from "@/assets/ceo.jpg";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -30,11 +32,50 @@ const values = [
 function About() {
   return (
     <>
-      <PageHero
-        eyebrow="About us"
-        title="We build innovation capability inside schools"
-        description="Kaleidonex started in 2016 with one robotics lab. Today we run future-skills programmes across 480 campuses, 72 cities and 6,500 trained teachers."
-      />
+      {/* ── Hero: two-column, text left / CEO image right ── */}
+      <div className="surface-grid border-b border-border">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 md:py-24 lg:grid-cols-2">
+          {/* Left — text */}
+          <div>
+            <Reveal>
+              <Eyebrow>About us</Eyebrow>
+            </Reveal>
+            <Reveal delay={80}>
+              <h1 className="mt-3 text-4xl font-bold leading-[1.08] md:text-5xl">
+                We build innovation capability inside schools
+              </h1>
+            </Reveal>
+            <Reveal delay={160}>
+              <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+                Kaleidonex started in 2016 with one robotics lab. Today we run
+                future-skills programmes across 480 campuses, 72 cities and
+                6,500 trained teachers.
+              </p>
+            </Reveal>
+          </div>
+
+          {/* Right — CEO image */}
+          <Reveal delay={200} className="relative">
+            <div className="group relative overflow-hidden rounded-2xl border border-border shadow-lift">
+              <img
+                src={ceoImage}
+                alt="Founder & CEO of Kaleidonex"
+                className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+              />
+              {/* Quote card overlay */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-6 pb-6 pt-12">
+                <p className="text-sm font-medium italic leading-relaxed text-white/90">
+                  "Every child in India deserves access to the same quality of
+                  future-skills education — regardless of where they live."
+                </p>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-white/70">
+                  Kaushlendra Kumar — Founder &amp; CEO, Kaleidonex
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
 
       <Section>
         <div className="grid gap-10 lg:grid-cols-2">

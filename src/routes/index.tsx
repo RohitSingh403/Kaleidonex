@@ -196,7 +196,7 @@ function Home() {
           {programs.map((p, i) => (
             <Reveal key={p.title} delay={(i % 3) * 90}>
               <Card {...p} />
-            </Reveal>
+            </Reveal> 
           ))}
         </div>
       </Section>
